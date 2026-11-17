@@ -26,7 +26,7 @@
   const SUPERSCRIPT = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
   const DIALECTS = { hailu: '海陸腔', sixian: '四縣腔' };
 
-  const state = { dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, fontUp: 1 };
+  const state = { dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -58,6 +58,10 @@
     sync('tone', state.toneMode);
     sync('view', state.view);
     $('fontToggle').textContent = state.fontUp > 1 ? '字級－' : '字級＋';
+    const meaningToggle = $('meaningToggle');
+    meaningToggle.textContent = state.showAll ? '華語：全部顯示' : '華語：逐詞揭曉';
+    meaningToggle.setAttribute('aria-pressed', String(state.showAll));
+    meaningToggle.classList.toggle('active', state.showAll);
     $('app').style.setProperty('--fontup', state.fontUp);
     $('groupTabs').innerHTML = [{ id: 'all' }, ...DATA.groups].map(g => {
       const on = g.id === state.group;
@@ -82,22 +86,25 @@
     alt.hidden = !(entry && entry.alt);
     alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
 
-    $('cardGuess').hidden = state.shown;
-    $('cardAnswer').hidden = !state.shown;
+    // 「華語：全部顯示」開啟時，每張卡片直接顯示釋義與備註，不必逐詞揭曉。
+    const shown = state.showAll || state.shown;
+    $('cardGuess').hidden = shown;
+    $('cardAnswer').hidden = !shown;
     const meaning = $('cardMeaning');
-    meaning.textContent = state.shown ? word.meaning : '';
+    meaning.textContent = shown ? word.meaning : '';
     meaning.classList.toggle('long', String(word.meaning).length > 8);
     const note = $('cardNote');
-    note.hidden = !(state.shown && word.note);
-    note.textContent = state.shown && word.note ? word.note : '';
+    note.hidden = !(shown && word.note);
+    note.textContent = shown && word.note ? word.note : '';
     const image = $('cardImage');
-    if (state.shown && word.image && word.image.src) {
+    if (shown && word.image && word.image.src) {
       const credit = word.image.credit ? esc(word.image.credit) : '';
       const caption = word.image.url ? `<a href="${esc(word.image.url)}" target="_blank" rel="noopener noreferrer">${credit || '圖片來源'}</a>` : credit;
       image.innerHTML = `<figure><img src="${esc(word.image.src)}" alt="${esc(entry ? entry.han : word.meaning)}"><figcaption>${caption}</figcaption></figure>`;
       image.hidden = false;
     } else { image.hidden = true; image.innerHTML = ''; }
-    $('revealBtn').textContent = state.shown ? '蓋回答案' : '揭曉華語詞義';
+    $('revealBtn').textContent = shown ? '蓋回答案' : '揭曉華語詞義';
+    $('revealBtn').hidden = state.showAll;
   }
 
   function renderList() {
@@ -131,7 +138,7 @@
     const n = currentWords().length; if (n < 2) return;
     state.idx = (state.idx + 1 + randomIndex(n - 1)) % n; state.shown = false; renderCard();
   }
-  function toggleReveal() { if (!currentWords().length) return; state.shown = !state.shown; renderCard(); }
+  function toggleReveal() { if (!currentWords().length || state.showAll) return; state.shown = !state.shown; renderCard(); }
 
   /* ── 凡例視窗 ── */
   let dialogReturnFocus = null;
@@ -157,20 +164,21 @@
     const t = e.target.closest('button'); if (!t) return;
     // 用滑鼠或觸控操作後，把焦點放回「揭曉」鈕，接著按空白鍵就能揭曉；
     // 用鍵盤操作（e.detail 為 0）時不移動焦點，維持原本的操作位置。
-    const refocus = () => { if (e.detail > 0 && state.view === 'card') $('revealBtn').focus({ preventScroll: true }); };
+    const refocus = () => { if (e.detail > 0 && state.view === 'card' && !state.showAll) $('revealBtn').focus({ preventScroll: true }); };
     if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }
     if (t.dataset.tone) { state.toneMode = t.dataset.tone; render(); refocus(); return; }
     if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
     if (t.dataset.group) { state.group = t.dataset.group; state.idx = 0; state.shown = false; render(); refocus(); return; }
     if (t.dataset.open) {
       const i = currentWords().findIndex(w => String(w.id) === t.dataset.open);
-      if (i >= 0) { state.idx = i; state.shown = false; state.view = 'card'; render(); $('revealBtn').focus(); }
+      if (i >= 0) { state.idx = i; state.shown = false; state.view = 'card'; render(); if (!state.showAll) $('revealBtn').focus(); }
       return;
     }
     if (t.dataset.action === 'reveal') toggleReveal();
     if (t.dataset.action === 'prev') { step(-1); refocus(); }
     if (t.dataset.action === 'next') { step(1); refocus(); }
     if (t.dataset.action === 'random') { jumpRandom(); refocus(); }
+    if (t.id === 'meaningToggle') { state.showAll = !state.showAll; state.shown = false; render(); refocus(); }
     if (t.id === 'fontToggle') { state.fontUp = state.fontUp > 1 ? 1 : 1.2; render(); refocus(); }
     if (t.id === 'legendBtn') openLegend();
     if (t.id === 'fullscreenToggle') toggleFullscreen();

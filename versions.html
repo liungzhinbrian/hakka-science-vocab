@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1b5e51">
-<title>版本更新紀錄｜生活中的科學　客語詞彙篇｜V1.0.0</title>
+<title>版本更新紀錄｜生活中的科學　客語詞彙篇｜V1.1.2</title>
 <style>
 :root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#24124e;background:#3d2f8e}
 *{box-sizing:border-box}body{margin:0;min-height:100vh}
@@ -16,10 +16,38 @@ code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#ece6
 a:focus-visible{outline:3px solid #e0a33d;outline-offset:3px}
 @media(max-width:680px){main{margin:0;border-radius:0;padding:22px 20px}}
 </style></head><body>
-<header><strong>生活中的科學　客語詞彙篇</strong><span>V1.0.0</span><a href="index.html">返回網站</a><a href="CHANGELOG.md" download>下載Markdown日誌</a></header>
+<header><strong>生活中的科學　客語詞彙篇</strong><span>V1.1.2</span><a href="index.html">返回網站</a><a href="CHANGELOG.md" download>下載Markdown日誌</a></header>
 <main>
 <h1>版本更新紀錄｜生活中的科學　客語詞彙篇</h1>
 <p>按版本由新至舊排列。每次修正都在最上方新增一筆，寫明版本號、日期與變更內容；<code>versions.html</code> 與本檔內容相同。</p>
+<h2>V1.1.2｜2026-11-17</h2>
+<p><strong>IPA的送氣符號一律上標</strong></p>
+<ul>
+<li>依授課教師指示，凡以IPA表記之處，送氣符號一律使用上標 ʰ。</li>
+<li>V1.1.1 只在畫面顯示時轉成上標，原始資料檔 <code>phonology-rimes-data.js</code> 仍以一般字母表示送氣。本版直接把資料檔的5個送氣聲母改為 pʰ、tʰ、kʰ、tʃʰ、tsʰ，元音表例字的聲母標記一併修正；<code>phonology-moe-map.js</code> 的對照鍵同步更新。例字與配字內容逐格比對，未更動。</li>
+<li>以IPA搜尋送氣聲母時，輸入上標或未上標的寫法都能找到。</li>
+<li>修訂 V1.1.1 日誌中一處以未上標寫法列出送氣聲母的文字。</li>
+<li>畫面上的拼音顯示與其他功能均未更動。</li>
+</ul>
+<h2>V1.1.1｜2026-11-17</h2>
+<p><strong>語音工具的元音表、韻母配字表改以教育部拼音顯示</strong></p>
+<ul>
+<li>這兩張表的原始資料取自授課教師的論文附錄，聲母與韻母以IPA記錄。網站改依教育部臺灣客語拼音方案顯示，方括號內以小字附原表的IPA。</li>
+<li>聲母22個全部轉寫，例如 [p] 顯示為 b、[pʰ] 顯示為 p、[tsʰ] 顯示為 c、[tʃ] 顯示為 zh、[ʒ] 顯示為 rh。[ŋ] 與 [ɲ] 在拼音方案同寫作 ng，因此聲母 ng 有兩列，以附註的IPA區別；兩列在原表中互補，沒有任何韻母兩列都有例字。</li>
+<li>韻母70個中有39個寫法不同：[ɑ] 與 [a] 同寫作 a，[ɨ] 寫作 ii，[ŋ] 寫作 ng，入聲韻尾 -p、-t、-k 寫作 -b、-d、-g，[ə] 寫作 er，成音節的 m̩、n̩、ŋ̍ 寫作 m、n、ng。轉寫後70個韻母沒有重複。</li>
+<li>元音表保留「拼音方案」「國際音標」兩欄對照；例字欄「聲母－例字」的聲母改為拼音。</li>
+<li>搜尋改以例字或教育部拼音比對；輸入含IPA專用符號（如 ŋ、ʃ、ɑ）時才比對原表的IPA。</li>
+<li>原始資料檔 <code>phonology-rimes-data.js</code> 未更動；對照表獨立為 <code>phonology-moe-map.js</code>，要修正某個對應只需改這個檔。例字與配字內容均未更動。</li>
+<li>送氣聲母在附註的IPA中以上標 ʰ 表示（pʰ、tʰ、kʰ、tʃʰ、tsʰ），與「聲母」頁一致。</li>
+</ul>
+<h2>V1.1.0｜2026-11-17</h2>
+<p><strong>新增「華語：全部顯示」切換</strong></p>
+<ul>
+<li>頂列新增「華語：逐詞揭曉／全部顯示」切換鈕。切到「全部顯示」後，每張詞彙卡直接顯示華語釋義與備註，換詞、換分類、換腔調都維持顯示，不必逐詞按揭曉。</li>
+<li>「全部顯示」時不顯示「揭曉華語詞義」按鈕，空白鍵也不作用；再按一次切換鈕即回到逐詞揭曉，並從蓋住答案的狀態開始。</li>
+<li>預設仍為逐詞揭曉；這個設定不會儲存，重新載入網頁後回到預設。</li>
+<li>詞彙資料、語音工具與其他功能均未更動。</li>
+</ul>
 <h2>V1.0.0｜2026-11-17</h2>
 <p><strong>首次發布：擂茶詞彙60詞，海陸腔與四縣腔</strong></p>
 <ul>

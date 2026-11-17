@@ -64,6 +64,8 @@ a{color:inherit}
 .top-button,.icon-button{border:1px solid var(--line);border-radius:10px;padding:9px 13px;background:var(--panel);color:var(--ink);font-size:15px;font-weight:750;white-space:nowrap}
 .icon-button{font-size:21px;line-height:1;min-width:42px;padding:8px 10px}
 .top-button:hover,.icon-button:hover{background:var(--panel-hover)}
+.toggle-button.active{background:var(--sage);border-color:var(--sage);color:var(--on-sage)}
+.toggle-button.active:hover{background:var(--sage-light)}
 
 /* ── 分類頁籤 ── */
 .group-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:12px clamp(14px,3vw,36px) 0}
@@ -130,6 +132,13 @@ a{color:inherit}
 .dialog button:focus-visible,.phonology-dialog button:focus-visible,.phonology-dialog input:focus-visible,.phonology-dialog a:focus-visible,.phonology-dialog summary:focus-visible{outline-color:#e0a33d}
 .noscript{margin:20px;padding:14px;background:#fff;color:#24124e;border-radius:10px}
 
+/* 中等寬度（例如 1366 寬的投影）：略收按鈕間距，讓頂列維持一行。 */
+@media(max-width:1500px) and (min-width:701px){
+  .top-actions{gap:6px}
+  .seg button{padding:9px 11px}
+  .top-button{padding:9px 10px}
+  .icon-button{min-width:38px;padding:8px}
+}
 /* ── 窄螢幕 ── */
 @media(max-width:700px){
   .word-area{min-height:300px}
@@ -167,6 +176,9 @@ a{color:inherit}
 /* ── 語音工具（沿用「飄洋過海尋客家」beta V8.1.0 的版面，改為本站配色） ── */
 .phonology-close{color:var(--dialog-ink)}
 .phonology-dialog{font-family:var(--font-pinyin)}
+/* V1.1.1：韻母配字表以教育部拼音為主，方括號內的IPA用小字附註。 */
+.phon-rime-initial small,.phon-rime-table th small{display:block;margin-top:1px;font-size:11px;font-weight:400;color:#6a5c8f;white-space:nowrap}
+.phon-rime-ipa{margin-left:8px;font-size:14px;color:#6a5c8f}
 .phonology-overlay[hidden]{display:none!important}.phonology-overlay{position:fixed;inset:0;background:rgba(22,10,62,.80);z-index:3000;display:grid;place-items:center;padding:14px}.phonology-dialog{background:#faf8fe;color:#24124e;border-radius:22px;box-shadow:0 30px 85px #0e052388;width:min(1120px,98vw);max-height:96vh;overflow:auto;padding:22px 26px}.phonology-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dad3ec;padding-bottom:9px}.phonology-head h2{font-size:clamp(23px,2.6vw,34px);margin:3px 0}.phonology-close{border:0;background:#e7e1f4;border-radius:50%;font-size:28px;width:42px;height:42px;cursor:pointer}.phonology-actions,.phonology-dialects,.phonology-tone-buttons{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.phonology-actions button,.phonology-dialects button,.phonology-tone-buttons button,.phonology-all{border:1px solid #baadd7;background:white;color:#2f1a5f;padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:700;font-size:15px}.phonology-actions button.active,.phonology-dialects button.active,.phonology-tone-buttons button.active,.phonology-all.active{background:#2f0590;color:white;border-color:#2f0590}.phonology-wrap{overflow-x:auto}.phonology-grid{border-collapse:separate;border-spacing:3px;width:100%;min-width:750px;table-layout:fixed}.phonology-grid th{background:#e0d7f4;padding:10px 4px;color:#2d195c;font-size:13px}.phonology-grid td{border-radius:8px;background:#f1eef8;text-align:center;height:54px;padding:2px}.phonology-grid td:first-child{font-weight:750;background:#e4def1;min-width:105px;font-size:14px}.phonology-grid button{width:100%;height:49px;border:1px solid #977ed2;border-radius:8px;background:#fff;color:#280773;cursor:pointer;font-size:19px;font-weight:800;line-height:1.2}.phonology-grid button:hover,.phonology-grid button.active{background:#2e0392;color:#fff}.phonology-detail{background:#ebe4fa;border:1px solid #cec0ee;border-radius:13px;padding:16px 19px;margin:14px 0;line-height:1.7}.phonology-detail strong{font-size:25px}.phonology-note{font-size:13px;color:#5e5279;line-height:1.7}.phonology-tone-chart{width:100%;height:auto;max-height:440px;border:1px solid #dbd4ec;background:#fff;border-radius:12px}.phonology-tone-chart .tone-path{transition:opacity .22s;stroke-linecap:round;fill:none;stroke-width:4;stroke-dasharray:420;stroke-dashoffset:420;animation:drawTone .8s ease forwards}.phonology-tone-chart .tone-path.muted{stroke:#cec8dc!important;opacity:.2;animation:none;stroke-dashoffset:0}.phonology-tone-chart .tone-path:not(.muted){filter:drop-shadow(0 1px 2px #aaa3)}@keyframes drawTone{to{stroke-dashoffset:0}}.phonology-ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.phonology-ref-grid figure{margin:0;background:white;border:1px solid #dfd9ec;border-radius:12px;padding:9px}.phonology-ref-grid img{width:100%;height:auto;display:block}.phonology-ref-grid figcaption{font-size:13px;color:#4e3f6f;padding-top:8px}.phonology-headerline{font-weight:800;color:#311e5c;margin:15px 0 6px}.phonology-consonant-key{font-size:14px;color:#3d2b65}.phonology-tone-stat{font-size:20px;font-weight:750;color:#300b86;text-align:center;padding:5px 0 0}.phonology-toolbarline{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px}.phonology-toggle{display:flex;align-items:center;gap:6px;font-size:13px}.phonology-toggle input{width:17px;height:17px}.phonology-small-table{border-collapse:collapse;width:100%;margin:10px 0}.phonology-small-table th,.phonology-small-table td{border:1px solid #c4b9dc;padding:9px 7px;text-align:center}.phonology-small-table th{background:#e0d7f4}.phonology-ref-note{color:#5b4e79;font-size:13px}.phonology-hidden{display:none!important}
 @media(max-width:700px){.phonology-dialog{padding:12px}.phonology-ref-grid{grid-template-columns:1fr}.phonology-grid{min-width:690px}}
 .phonology-dialects[hidden]{display:none!important}
