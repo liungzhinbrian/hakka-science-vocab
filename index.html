@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1b5e51">
+  <meta name="description" content="生活中的科學　客語詞彙篇：擂茶客語詞彙互動學習網站。海陸腔與四縣腔、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
+  <title>生活中的科學　客語詞彙篇｜V1.0.0</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="vocab-data.js" defer></script>
+  <script src="phonology-rimes-data.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="phonology-tools.js" defer></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">客</span>
+        <div class="brand-text">
+          <strong id="siteTitle">生活中的科學　客語詞彙篇</strong>
+          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.0.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="seg" role="group" aria-label="腔調">
+          <button type="button" data-dialect="hailu" aria-pressed="true" class="active">海陸腔</button>
+          <button type="button" data-dialect="sixian" aria-pressed="false">四縣腔</button>
+        </div>
+        <div class="seg" role="group" aria-label="拼音標記">
+          <button type="button" data-tone="value" aria-pressed="true" class="active">調值</button>
+          <button type="button" data-tone="shape" aria-pressed="false">調型</button>
+        </div>
+        <div class="seg" role="group" aria-label="檢視方式">
+          <button type="button" data-view="card" aria-pressed="true" class="active">詞彙卡</button>
+          <button type="button" data-view="list" aria-pressed="false">詞彙總表</button>
+        </div>
+        <button type="button" id="fontToggle" class="top-button" title="調整字級">字級＋</button>
+        <button type="button" id="phonologyLaunch" class="top-button" title="客語聲調、聲母、元音與韻母速查" aria-haspopup="dialog">♫ 語音工具</button>
+        <button type="button" id="legendBtn" class="top-button" aria-haspopup="dialog">凡例</button>
+        <button type="button" id="fullscreenToggle" class="icon-button" title="全螢幕（F）" aria-label="切換全螢幕">⛶</button>
+      </div>
+    </header>
+
+    <nav class="group-tabs" id="groupTabs" aria-label="詞彙分類"></nav>
+
+    <main class="main" id="main">
+      <section id="cardView" class="card-layout" aria-label="詞彙卡">
+        <div class="card-main">
+          <div class="card-top">
+            <span id="cardProgress" class="card-progress"></span>
+            <span id="cardPos" class="pos-tag"></span>
+          </div>
+          <div class="word-area">
+            <div id="cardHan" class="han" lang="hak"></div>
+            <div id="cardPinyin" class="pinyin" lang="hak"></div>
+            <div id="cardAlt" class="pinyin-alt" lang="hak" hidden></div>
+            <div id="cardGuess" class="guess">猜猜看，這個詞是什麼意思？</div>
+            <div id="cardAnswer" class="answer" aria-live="polite" hidden>
+              <div id="cardMeaning" class="meaning"></div>
+              <div id="cardNote" class="note" hidden></div>
+              <div id="cardImage" class="image" hidden></div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button type="button" id="revealBtn" class="reveal" data-action="reveal">揭曉華語詞義</button>
+            <div class="card-nav">
+              <button type="button" data-action="prev">← 上一詞</button>
+              <button type="button" data-action="next">下一詞 →</button>
+              <button type="button" data-action="random">隨機抽一詞</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="listView" class="list-view" aria-label="詞彙總表" hidden>
+        <p class="list-hint">點選漢字可開啟該詞的詞彙卡。</p>
+        <div class="list-scroll">
+          <table class="vocab-table">
+            <thead><tr><th scope="col">編號</th><th scope="col">詞性</th><th scope="col">客語漢字</th><th scope="col">客語拼音</th><th scope="col">華語釋義</th><th scope="col">備註</th></tr></thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span id="footInfo"></span>
+      <span class="foot-keys">←／→ 換詞　空白鍵 揭曉／蓋回　F 全螢幕</span>
+    </footer>
+  </div>
+
+  <div id="dialogOverlay" class="dialog-overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <div class="dialog-top"><h2 id="dialogTitle"></h2><button type="button" id="dialogClose" class="icon-button" aria-label="關閉">×</button></div>
+      <div id="dialogContent"></div>
+    </div>
+  </div>
+
+  <!-- 語音工具：沿用「飄洋過海尋客家」beta V8.1.0 的 phonology-tools.js 與 phonology-rimes-data.js -->
+  <div id="phonologyOverlay" class="phonology-overlay" hidden>
+    <section class="phonology-dialog" role="dialog" aria-modal="true" aria-labelledby="phonologyTitle">
+      <header class="phonology-head"><div><div class="micro-label">海陸腔／四縣腔</div><h2 id="phonologyTitle">客語語音互動工具</h2></div><button id="phonologyClose" class="phonology-close" type="button" aria-label="關閉語音工具">×</button></header>
+      <div class="phonology-actions"><button data-phon-tab="tones" class="active" aria-pressed="true">聲調</button><button data-phon-tab="consonants" aria-pressed="false">聲母</button><button data-phon-tab="vowels" aria-pressed="false">元音</button><button data-phon-tab="rimes" aria-pressed="false">韻母配字表</button><button data-phon-tab="references" aria-pressed="false">原始圖表</button><button data-phon-tab="sandhi" aria-pressed="false">連讀變調</button></div>
+      <div class="phonology-dialects"><button data-phon-dialect="hailu" class="active" aria-pressed="true">海陸腔</button><button data-phon-dialect="sixian" aria-pressed="false">四縣腔</button></div>
+      <div id="phonologyContent"></div>
+    </section>
+  </div>
+  <noscript><p class="noscript">本網站需要啟用JavaScript，才能使用詞彙卡與腔調切換。</p></noscript>
+</body>
+</html>

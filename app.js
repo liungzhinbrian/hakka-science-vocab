@@ -1,0 +1,200 @@
+/* 生活中的科學　客語詞彙篇｜詞彙卡與詞彙總表
+   原生 HTML／CSS／JavaScript，不使用框架、外部函式庫或伺服器。
+   ─ 修改詞彙：vocab-data.js
+   ─ 修改外觀：styles.css 最上方的變數
+   ─ 語音工具：phonology-tools.js、phonology-rimes-data.js（獨立運作）
+   ─ 每次改版請更新 vocab-data.js 的 version，並在 CHANGELOG.md、versions.html 各加一筆。
+*/
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const DATA = window.VOCAB_DATA;
+  if (!DATA || !Array.isArray(DATA.words)) {
+    $('main').textContent = '找不到 vocab-data.js，請確認檔案與 index.html 放在同一資料夾。';
+    return;
+  }
+
+  /* ── 聲調對照（依授課教師提供版本）。海陸、四縣各自獨立，不做跨腔推算。 ── */
+  const TONE_TABLE = {
+    hailu: [['陰平', '53', 'ˋ'], ['陽平', '55', ''], ['上聲', '24', 'ˊ'], ['陰去', '11', 'ˇ'], ['陽去', '33', '+'], ['陰入', '5', ''], ['陽入', '2', 'ˋ']],
+    sixian: [['陰平', '24', 'ˊ'], ['陽平', '11', 'ˇ'], ['上聲', '31', 'ˋ'], ['去聲', '55', ''], ['陰入', '2', 'ˋ'], ['陽入', '5', '']]
+  };
+  const TONE_MARKS = {};
+  for (const [dialect, rows] of Object.entries(TONE_TABLE)) {
+    TONE_MARKS[dialect] = Object.fromEntries(rows.map(([, value, mark]) => [value, mark]));
+  }
+  const SUPERSCRIPT = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+  const DIALECTS = { hailu: '海陸腔', sixian: '四縣腔' };
+
+  const state = { dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, fontUp: 1 };
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* 資料一律存調值；只在顯示時轉成上標數字或調型符號。
+     遇到該腔調沒有的調值會原樣保留，方便發現資料錯誤。 */
+  function formatPinyin(source, dialect, mode = state.toneMode) {
+    const marks = TONE_MARKS[dialect];
+    if (!marks) return String(source ?? '');
+    return String(source ?? '').replace(/([a-z]+)(53|55|24|11|33|31|5|2)(?=[^a-z0-9]|$)/gi, (raw, syllable, tone) => {
+      if (!Object.prototype.hasOwnProperty.call(marks, tone)) return raw.toLowerCase();
+      const ending = mode === 'value' ? [...tone].map(d => SUPERSCRIPT[d]).join('') : marks[tone];
+      return syllable.toLowerCase() + ending;
+    });
+  }
+
+  const groupLabel = id => id === 'all' ? '全部' : (DATA.groups.find(g => g.id === id)?.label ?? id);
+  const wordsIn = id => id === 'all' ? DATA.words : DATA.words.filter(w => w.group === id);
+  const currentWords = () => wordsIn(state.group);
+  const entryOf = (word, dialect = state.dialect) => word[dialect] || null;
+
+  /* ── 畫面更新 ── */
+  function renderControls() {
+    const sync = (attr, value) => document.querySelectorAll(`[data-${attr}]`).forEach(el => {
+      const on = el.dataset[attr] === value;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', String(on));
+    });
+    sync('dialect', state.dialect);
+    sync('tone', state.toneMode);
+    sync('view', state.view);
+    $('fontToggle').textContent = state.fontUp > 1 ? '字級－' : '字級＋';
+    $('app').style.setProperty('--fontup', state.fontUp);
+    $('groupTabs').innerHTML = [{ id: 'all' }, ...DATA.groups].map(g => {
+      const on = g.id === state.group;
+      return `<button type="button" data-group="${esc(g.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(groupLabel(g.id))}<small>${wordsIn(g.id).length}</small></button>`;
+    }).join('');
+  }
+
+  function renderCard() {
+    const words = currentWords();
+    const main = document.querySelector('.card-main');
+    if (!words.length) { main.classList.add('is-empty'); $('cardProgress').textContent = '這個分類目前沒有詞彙。'; return; }
+    main.classList.remove('is-empty');
+    state.idx = Math.max(0, Math.min(words.length - 1, state.idx));
+    const word = words[state.idx];
+    const entry = entryOf(word);
+    $('cardProgress').textContent = `${DIALECTS[state.dialect]}・${groupLabel(state.group)}・第${state.idx + 1}／${words.length}詞`;
+    $('cardPos').textContent = word.pos ? `【${word.pos}】` : '';
+    $('cardPos').hidden = !word.pos;
+    $('cardHan').textContent = entry ? entry.han : '（此腔調尚未建立資料）';
+    $('cardPinyin').textContent = entry ? formatPinyin(entry.pinyin, state.dialect) : '';
+    const alt = $('cardAlt');
+    alt.hidden = !(entry && entry.alt);
+    alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
+
+    $('cardGuess').hidden = state.shown;
+    $('cardAnswer').hidden = !state.shown;
+    const meaning = $('cardMeaning');
+    meaning.textContent = state.shown ? word.meaning : '';
+    meaning.classList.toggle('long', String(word.meaning).length > 8);
+    const note = $('cardNote');
+    note.hidden = !(state.shown && word.note);
+    note.textContent = state.shown && word.note ? word.note : '';
+    const image = $('cardImage');
+    if (state.shown && word.image && word.image.src) {
+      const credit = word.image.credit ? esc(word.image.credit) : '';
+      const caption = word.image.url ? `<a href="${esc(word.image.url)}" target="_blank" rel="noopener noreferrer">${credit || '圖片來源'}</a>` : credit;
+      image.innerHTML = `<figure><img src="${esc(word.image.src)}" alt="${esc(entry ? entry.han : word.meaning)}"><figcaption>${caption}</figcaption></figure>`;
+      image.hidden = false;
+    } else { image.hidden = true; image.innerHTML = ''; }
+    $('revealBtn').textContent = state.shown ? '蓋回答案' : '揭曉華語詞義';
+  }
+
+  function renderList() {
+    $('listBody').innerHTML = currentWords().map(word => {
+      const entry = entryOf(word);
+      const pinyin = entry ? esc(formatPinyin(entry.pinyin, state.dialect)) : '';
+      const alt = entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '';
+      return `<tr><td>${esc(word.id)}</td><td>${esc(word.pos || '')}</td>`
+        + `<td><button type="button" class="list-word" data-open="${esc(word.id)}" lang="hak">${esc(entry ? entry.han : '—')}</button></td>`
+        + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
+    }).join('');
+  }
+
+  function render() {
+    renderControls();
+    $('cardView').hidden = state.view !== 'card';
+    $('listView').hidden = state.view !== 'list';
+    if (state.view === 'card') renderCard(); else renderList();
+  }
+
+  /* ── 詞彙卡操作 ── */
+  function randomIndex(length) {
+    if (globalThis.crypto?.getRandomValues) { const a = new Uint32Array(1); globalThis.crypto.getRandomValues(a); return a[0] % length; }
+    return Math.floor(Math.random() * length);
+  }
+  function step(delta) {
+    const n = currentWords().length; if (!n) return;
+    state.idx = (state.idx + delta + n) % n; state.shown = false; renderCard();
+  }
+  function jumpRandom() {
+    const n = currentWords().length; if (n < 2) return;
+    state.idx = (state.idx + 1 + randomIndex(n - 1)) % n; state.shown = false; renderCard();
+  }
+  function toggleReveal() { if (!currentWords().length) return; state.shown = !state.shown; renderCard(); }
+
+  /* ── 凡例視窗 ── */
+  let dialogReturnFocus = null;
+  function openLegend() {
+    $('dialogTitle').textContent = '凡例';
+    $('dialogContent').innerHTML = `<ul>${(DATA.legend || []).map(item => `<li>${esc(item)}</li>`).join('')}</ul>`;
+    dialogReturnFocus = document.activeElement;
+    $('dialogOverlay').hidden = false; $('dialogClose').focus();
+  }
+  function closeDialog() {
+    if ($('dialogOverlay').hidden) return;
+    $('dialogOverlay').hidden = true; dialogReturnFocus?.focus?.();
+  }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen?.().catch(() => {});
+  }
+
+  /* ── 事件 ── */
+  document.addEventListener('click', e => {
+    if (e.target === $('dialogOverlay') || e.target.closest('#dialogClose')) { closeDialog(); return; }
+    const t = e.target.closest('button'); if (!t) return;
+    // 用滑鼠或觸控操作後，把焦點放回「揭曉」鈕，接著按空白鍵就能揭曉；
+    // 用鍵盤操作（e.detail 為 0）時不移動焦點，維持原本的操作位置。
+    const refocus = () => { if (e.detail > 0 && state.view === 'card') $('revealBtn').focus({ preventScroll: true }); };
+    if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }
+    if (t.dataset.tone) { state.toneMode = t.dataset.tone; render(); refocus(); return; }
+    if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
+    if (t.dataset.group) { state.group = t.dataset.group; state.idx = 0; state.shown = false; render(); refocus(); return; }
+    if (t.dataset.open) {
+      const i = currentWords().findIndex(w => String(w.id) === t.dataset.open);
+      if (i >= 0) { state.idx = i; state.shown = false; state.view = 'card'; render(); $('revealBtn').focus(); }
+      return;
+    }
+    if (t.dataset.action === 'reveal') toggleReveal();
+    if (t.dataset.action === 'prev') { step(-1); refocus(); }
+    if (t.dataset.action === 'next') { step(1); refocus(); }
+    if (t.dataset.action === 'random') { jumpRandom(); refocus(); }
+    if (t.id === 'fontToggle') { state.fontUp = state.fontUp > 1 ? 1 : 1.2; render(); refocus(); }
+    if (t.id === 'legendBtn') openLegend();
+    if (t.id === 'fullscreenToggle') toggleFullscreen();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeDialog(); return; }
+    // 凡例或語音工具開著時，不讓方向鍵、空白鍵去翻後面的詞彙卡。
+    if (document.querySelector('.dialog-overlay:not([hidden]), .phonology-overlay:not([hidden])')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const target = e.target;
+    if (target.matches?.('input,textarea,select') || target.isContentEditable) return;
+    if (e.key.toLowerCase() === 'f') { toggleFullscreen(); return; }
+    if (state.view !== 'card') return;
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
+    else if (e.key === ' ' && !target.closest?.('button,summary,a')) { e.preventDefault(); toggleReveal(); }
+  });
+
+  /* ── 啟動 ── */
+  $('siteTitle').textContent = DATA.title || '客語詞彙';
+  $('siteSub').textContent = DATA.subtitle || '';
+  $('siteVersion').textContent = DATA.version || '';
+  document.title = [DATA.title, DATA.version].filter(Boolean).join('｜');
+  $('footInfo').textContent = [[DATA.school, DATA.course].filter(Boolean).join('　'), DATA.term, DATA.teacher ? `授課教師：${DATA.teacher}` : ''].filter(Boolean).join('｜');
+  render();
+})();
