@@ -17,8 +17,9 @@ window.VOCAB_DATA = {
   school: "國立竹東高級中學",
   course: "多元選修「生活中的科學」",
   term: "115 學年度第一學期　客語結合十二年國教校訂課程",
-  teacher: "曾櫳震老師",
-  version: "V1.1.2",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
+  teachers: "授課教師：葉鈞喬老師、黃勤展老師",
+  credit: "網頁編修／客華校訂／語音資料：曾櫳震老師",
+  version: "V1.2.0",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
   legend: [
     "客語漢字：優先使用教育部客語推薦用字表之漢字，若無則從俗暫用。",
     "客語拼音：以教育部辭典為主。資料以調值記錄，網站可切換顯示調值或調型符號。",

@@ -2,6 +2,7 @@
    原生 HTML／CSS／JavaScript，不使用框架、外部函式庫或伺服器。
    ─ 修改詞彙：vocab-data.js
    ─ 修改外觀：styles.css 最上方的變數
+   ─ 音檔：assets/audio/，清單在 audio-manifest.js
    ─ 語音工具：phonology-tools.js、phonology-rimes-data.js（獨立運作）
    ─ 每次改版請更新 vocab-data.js 的 version，並在 CHANGELOG.md、versions.html 各加一筆。
 */
@@ -14,7 +15,7 @@
     return;
   }
 
-  /* ── 聲調對照（依授課教師提供版本）。海陸、四縣各自獨立，不做跨腔推算。 ── */
+  /* ── 聲調對照（依曾櫳震老師提供版本）。海陸、四縣各自獨立，不做跨腔推算。 ── */
   const TONE_TABLE = {
     hailu: [['陰平', '53', 'ˋ'], ['陽平', '55', ''], ['上聲', '24', 'ˊ'], ['陰去', '11', 'ˇ'], ['陽去', '33', '+'], ['陰入', '5', ''], ['陽入', '2', 'ˋ']],
     sixian: [['陰平', '24', 'ˊ'], ['陽平', '11', 'ˇ'], ['上聲', '31', 'ˋ'], ['去聲', '55', ''], ['陰入', '2', 'ˋ'], ['陽入', '5', '']]
@@ -46,6 +47,40 @@
   const wordsIn = id => id === 'all' ? DATA.words : DATA.words.filter(w => w.group === id);
   const currentWords = () => wordsIn(state.group);
   const entryOf = (word, dialect = state.dialect) => word[dialect] || null;
+
+  /* ── 音檔：只在按下按鈕時播放，換詞不自動播放。 ── */
+  const AUDIO = window.VOCAB_AUDIO || null;
+  const audioKey = (word, dialect, alt) => {
+    if (!AUDIO) return '';
+    const key = String(word.id).padStart(2, '0') + (alt ? '-alt' : '');
+    return (AUDIO[dialect] || []).includes(key) ? `${dialect}/${key}` : '';
+  };
+  const audioUrl = key => (AUDIO.inline && AUDIO.inline[key]) || `${AUDIO.base}/${key}.${AUDIO.ext}`;
+  const audioButtons = (word, dialect) => {
+    const main = audioKey(word, dialect, false), alt = audioKey(word, dialect, true);
+    return (main ? `<button type="button" class="audio-btn" data-audio-key="${esc(main)}" title="播放讀音（P）"><span aria-hidden="true">▶</span> 播放</button>` : '')
+      + (alt ? `<button type="button" class="audio-btn" data-audio-key="${esc(alt)}" title="播放又音"><span aria-hidden="true">▶</span> 又音</button>` : '');
+  };
+  let player = null, playingButton = null;
+  function stopAudio() {
+    if (player) { player.pause(); player = null; }
+    if (playingButton) { playingButton.classList.remove('playing'); playingButton = null; }
+  }
+  function playAudio(key, button) {
+    stopAudio();
+    if (!key || !AUDIO) return;
+    const audio = new Audio(audioUrl(key));
+    player = audio; playingButton = button || null;
+    if (button) { button.classList.remove('failed'); button.classList.add('playing'); }
+    const finish = failed => {
+      if (player !== audio) return;
+      if (button) { button.classList.remove('playing'); if (failed) { button.classList.add('failed'); button.title = '音檔無法播放，請確認檔案已上傳'; } }
+      player = null; playingButton = null;
+    };
+    audio.addEventListener('ended', () => finish(false));
+    audio.addEventListener('error', () => finish(true));
+    audio.play().catch(() => finish(true));
+  }
 
   /* ── 畫面更新 ── */
   function renderControls() {
@@ -85,6 +120,13 @@
     const alt = $('cardAlt');
     alt.hidden = !(entry && entry.alt);
     alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
+    // 播放鈕只在換了詞或腔調時重畫，揭曉答案時不打斷正在播放的音檔。
+    const audioBox = $('cardAudio'), audioId = `${state.dialect}/${word.id}`;
+    if (audioBox.dataset.for !== audioId) {
+      audioBox.dataset.for = audioId;
+      audioBox.innerHTML = entry ? audioButtons(word, state.dialect) : '';
+      audioBox.hidden = !audioBox.innerHTML;
+    }
 
     // 「華語：全部顯示」開啟時，每張卡片直接顯示釋義與備註，不必逐詞揭曉。
     const shown = state.showAll || state.shown;
@@ -114,11 +156,12 @@
       const alt = entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '';
       return `<tr><td>${esc(word.id)}</td><td>${esc(word.pos || '')}</td>`
         + `<td><button type="button" class="list-word" data-open="${esc(word.id)}" lang="hak">${esc(entry ? entry.han : '—')}</button></td>`
-        + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
+        + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td class="audio-cell">${entry ? audioButtons(word, state.dialect) : ''}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
     }).join('');
   }
 
   function render() {
+    stopAudio();
     renderControls();
     $('cardView').hidden = state.view !== 'card';
     $('listView').hidden = state.view !== 'list';
@@ -132,11 +175,11 @@
   }
   function step(delta) {
     const n = currentWords().length; if (!n) return;
-    state.idx = (state.idx + delta + n) % n; state.shown = false; renderCard();
+    state.idx = (state.idx + delta + n) % n; state.shown = false; stopAudio(); renderCard();
   }
   function jumpRandom() {
     const n = currentWords().length; if (n < 2) return;
-    state.idx = (state.idx + 1 + randomIndex(n - 1)) % n; state.shown = false; renderCard();
+    state.idx = (state.idx + 1 + randomIndex(n - 1)) % n; state.shown = false; stopAudio(); renderCard();
   }
   function toggleReveal() { if (!currentWords().length || state.showAll) return; state.shown = !state.shown; renderCard(); }
 
@@ -165,6 +208,7 @@
     // 用滑鼠或觸控操作後，把焦點放回「揭曉」鈕，接著按空白鍵就能揭曉；
     // 用鍵盤操作（e.detail 為 0）時不移動焦點，維持原本的操作位置。
     const refocus = () => { if (e.detail > 0 && state.view === 'card' && !state.showAll) $('revealBtn').focus({ preventScroll: true }); };
+    if (t.dataset.audioKey) { playAudio(t.dataset.audioKey, t); refocus(); return; }
     if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }
     if (t.dataset.tone) { state.toneMode = t.dataset.tone; render(); refocus(); return; }
     if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
@@ -192,6 +236,7 @@
     const target = e.target;
     if (target.matches?.('input,textarea,select') || target.isContentEditable) return;
     if (e.key.toLowerCase() === 'f') { toggleFullscreen(); return; }
+    if (e.key.toLowerCase() === 'p' && state.view === 'card') { const b = document.querySelector('#cardAudio .audio-btn'); if (b) playAudio(b.dataset.audioKey, b); return; }
     if (state.view !== 'card') return;
     if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
     else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
@@ -203,6 +248,6 @@
   $('siteSub').textContent = DATA.subtitle || '';
   $('siteVersion').textContent = DATA.version || '';
   document.title = [DATA.title, DATA.version].filter(Boolean).join('｜');
-  $('footInfo').textContent = [[DATA.school, DATA.course].filter(Boolean).join('　'), DATA.term, DATA.teacher ? `授課教師：${DATA.teacher}` : ''].filter(Boolean).join('｜');
+  $('footInfo').textContent = [[DATA.school, DATA.course].filter(Boolean).join('　'), DATA.term, DATA.teachers, DATA.credit].filter(Boolean).join('｜');
   render();
 })();

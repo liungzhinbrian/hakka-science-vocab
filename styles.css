@@ -1,7 +1,7 @@
 /* 生活中的科學　客語詞彙篇｜樣式
    ───────────────────────────────────────────────
    要調整配色或字型，改這一段變數即可。
-   配色取自授課教師提供的簡報底圖：深綠 → 靛藍 → 紫 → 桃紅的直向漸層，
+   配色取自曾櫳震老師提供的簡報底圖：深綠 → 靛藍 → 紫 → 桃紅的直向漸層，
    搭配灰綠與琥珀兩個點綴色。 */
 :root{
   --bg-gradient:linear-gradient(180deg,#1b5e51 0%,#255063 15%,#314078 32%,#3d2f8e 50%,#4a1ea3 67%,#560db9 85%,#5a08c0 91%,#a827b7 96%,#e942ae 100%);
@@ -84,6 +84,14 @@ a{color:inherit}
 .word-area{flex:1;min-height:min(40vh,430px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;background:var(--panel-inset);border-radius:var(--radius);padding:20px}
 .han{font-family:var(--font-han);font-size:calc(clamp(54px,min(7.4vw,12.5vh),112px) * var(--fontup));font-weight:850;line-height:1.18;overflow-wrap:anywhere}
 .pinyin{font-family:var(--font-pinyin);font-size:calc(clamp(27px,min(3.5vw,6vh),50px) * var(--fontup));color:var(--amber-light);line-height:1.45;overflow-wrap:anywhere}
+.pinyin-row{display:flex;align-items:center;justify-content:center;gap:8px 18px;flex-wrap:wrap}
+.audio-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.audio-btn{border:1px solid var(--sage-light);background:rgba(111,168,156,.20);color:var(--ink);border-radius:999px;padding:8px 17px;font-size:17px;font-weight:750;white-space:nowrap;font-family:var(--font-ui)}
+.audio-btn:hover{background:rgba(111,168,156,.38)}
+.audio-btn.playing{background:var(--sage);border-color:var(--sage);color:var(--on-sage)}
+.audio-btn.failed{opacity:.65;border-style:dashed}
+.vocab-table .audio-cell{white-space:nowrap}
+.vocab-table .audio-btn{padding:4px 11px;font-size:14px;margin-right:5px}
 .pinyin-alt{font-family:var(--font-pinyin);font-size:calc(clamp(17px,1.8vw,24px) * var(--fontup));color:var(--muted)}
 .guess{margin-top:8px;color:var(--muted);font-size:20px}
 .answer{width:min(760px,94%);margin-top:6px;padding-top:11px;border-top:2px dashed rgba(255,255,255,.38);display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -118,7 +126,7 @@ a{color:inherit}
 .vocab-table td:last-child{color:rgba(255,255,255,.86);font-size:.9em;min-width:12em}
 
 /* ── 頁尾 ── */
-.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px clamp(14px,3vw,36px) 22px;font-size:12.5px;text-shadow:0 1px 3px rgba(40,0,90,.75)}
+.foot{display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;padding:8px clamp(14px,3vw,36px) 22px;font-size:12px;text-shadow:0 1px 3px rgba(40,0,90,.75)}
 .foot a{text-decoration:underline}
 
 /* ── 凡例視窗 ── */

@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1b5e51">
-  <meta name="description" content="生活中的科學　客語詞彙篇：擂茶客語詞彙互動學習網站。海陸腔與四縣腔、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
-  <title>生活中的科學　客語詞彙篇｜V1.1.2</title>
+  <meta name="description" content="生活中的科學　客語詞彙篇：擂茶客語詞彙互動學習網站。海陸腔與四縣腔、逐詞讀音、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
+  <title>生活中的科學　客語詞彙篇｜V1.2.0</title>
   <link rel="stylesheet" href="styles.css">
   <script src="vocab-data.js" defer></script>
+  <script src="audio-manifest.js" defer></script>
   <script src="phonology-rimes-data.js" defer></script>
   <script src="phonology-moe-map.js" defer></script>
   <script src="app.js" defer></script>
@@ -20,7 +21,7 @@
         <span class="brand-mark" aria-hidden="true">客</span>
         <div class="brand-text">
           <strong id="siteTitle">生活中的科學　客語詞彙篇</strong>
-          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.1.2</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
+          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.2.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
         </div>
       </div>
       <div class="top-actions">
@@ -55,7 +56,7 @@
           </div>
           <div class="word-area">
             <div id="cardHan" class="han" lang="hak"></div>
-            <div id="cardPinyin" class="pinyin" lang="hak"></div>
+            <div class="pinyin-row"><div id="cardPinyin" class="pinyin" lang="hak"></div><div id="cardAudio" class="audio-buttons" hidden></div></div>
             <div id="cardAlt" class="pinyin-alt" lang="hak" hidden></div>
             <div id="cardGuess" class="guess">猜猜看，這個詞是什麼意思？</div>
             <div id="cardAnswer" class="answer" aria-live="polite" hidden>
@@ -79,7 +80,7 @@
         <p class="list-hint">點選漢字可開啟該詞的詞彙卡。</p>
         <div class="list-scroll">
           <table class="vocab-table">
-            <thead><tr><th scope="col">編號</th><th scope="col">詞性</th><th scope="col">客語漢字</th><th scope="col">客語拼音</th><th scope="col">華語釋義</th><th scope="col">備註</th></tr></thead>
+            <thead><tr><th scope="col">編號</th><th scope="col">詞性</th><th scope="col">客語漢字</th><th scope="col">客語拼音</th><th scope="col">讀音</th><th scope="col">華語釋義</th><th scope="col">備註</th></tr></thead>
             <tbody id="listBody"></tbody>
           </table>
         </div>
@@ -88,7 +89,7 @@
 
     <footer class="foot">
       <span id="footInfo"></span>
-      <span class="foot-keys">←／→ 換詞　空白鍵 揭曉／蓋回　F 全螢幕</span>
+      <span class="foot-keys">←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕</span>
     </footer>
   </div>
 
