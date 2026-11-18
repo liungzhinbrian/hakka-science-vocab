@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1b5e51">
-<title>版本更新紀錄｜生活中的科學　客語詞彙篇｜V1.2.0</title>
+<title>版本更新紀錄｜生活中的科學　客語詞彙篇｜V1.3.0</title>
 <style>
 :root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#24124e;background:#3d2f8e}
 *{box-sizing:border-box}body{margin:0;min-height:100vh}
@@ -16,10 +16,25 @@ code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#ece6
 a:focus-visible{outline:3px solid #e0a33d;outline-offset:3px}
 @media(max-width:680px){main{margin:0;border-radius:0;padding:22px 20px}}
 </style></head><body>
-<header><strong>生活中的科學　客語詞彙篇</strong><span>V1.2.0</span><a href="index.html">返回網站</a><a href="CHANGELOG.md" download>下載Markdown日誌</a></header>
+<header><strong>生活中的科學　客語詞彙篇</strong><span>V1.3.0</span><a href="index.html">返回網站</a><a href="CHANGELOG.md" download>下載Markdown日誌</a></header>
 <main>
 <h1>版本更新紀錄｜生活中的科學　客語詞彙篇</h1>
 <p>按版本由新至舊排列。每次修正都在最上方新增一筆，寫明版本號、日期與變更內容；<code>versions.html</code> 與本檔內容相同。</p>
+<h2>V1.3.0｜2026-11-18</h2>
+<p><strong>新增主題切換；加入「傳統醫學與養生」「化學實驗」兩個主題與補充經絡圖</strong></p>
+<ul>
+<li>網站改為多主題：擂茶（60詞）、傳統醫學與養生（40詞）、化學實驗（22詞）。頁面上方新增主題切換，各主題有自己的詞彙、分類與音檔；網址加上 <code>?topic=tcm</code> 或 <code>?topic=chem</code> 可直接開啟該主題。</li>
+<li>擂茶主題的內容、分類與音檔均未更動，音檔位置不變，不需重新上傳。</li>
+<li>傳統醫學與養生40詞：兩腔的用字與標音先擬草稿，經逐詞校對定稿。校對時改定「肺」為海陸 fui11、四縣 fi55；新增「腰仔」（腎的一般說法）與「冷著／寒著」；「七層塔」兩腔各列一個又音。</li>
+<li>化學實驗22詞：同樣經逐詞校對定稿。校對時改定「鹼」為海陸 giam24、四縣 giam31；以「吊菜仔色」取代「紫色」，並加備註；「青色」加備註；刪去「粉紅色」「咖啡色」「灰色」。</li>
+<li>兩腔用字不同的詞分別顯示：海陸「冷天」「冷著」，四縣「寒天」「寒著」。</li>
+<li>兩個新主題尚未設定分類與詞性標籤，因此不顯示分類頁籤、詞性標籤與詞彙總表的詞性欄；也尚未錄音，因此不顯示播放鈕與讀音欄。</li>
+<li>傳統醫學與養生主題新增「補充：經絡圖」：十二正經與任督二脈共14張動態示意圖，依十二正經流注順序排列，其後為任脈、督脈。縮圖為靜態圖，點選後放大播放，可用畫面按鈕或鍵盤 ←／→ 換張、Esc 關閉。</li>
+<li>補充區加註說明：這些圖是為了方便瀏覽與對照的補充示意圖，僅供參考，並非學生教材，授課時也不會使用；圖中文字為簡體字，本站標題與說明一律以正體字書寫，在臺灣書寫應以正體（繁體）中文為主。</li>
+<li>腎經一圖的原圖標題誤作「足太陰」，本站標題寫作正確的「足少陰腎經」，並在圖旁註明。</li>
+<li>音檔清單 <code>audio-manifest.js</code> 改為依主題分段；新主題的音檔將放在 <code>assets/audio/tcm/</code> 與 <code>assets/audio/chem/</code>。</li>
+<li>尚待處理：兩個新主題的錄音、分類名稱與詞性標籤。</li>
+</ul>
 <h2>V1.2.0｜2026-11-17</h2>
 <p><strong>加入逐詞讀音（海陸腔、四縣腔）</strong></p>
 <ul>

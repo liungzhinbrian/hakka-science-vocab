@@ -68,7 +68,14 @@ a{color:inherit}
 .toggle-button.active:hover{background:var(--sage-light)}
 
 /* ── 分類頁籤 ── */
-.group-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:12px clamp(14px,3vw,36px) 0}
+.filter-row{display:flex;align-items:center;gap:9px 16px;flex-wrap:wrap;padding:12px clamp(14px,3vw,36px) 0}
+/* 主題（最上層）：白底深字表示目前的主題，和下面琥珀色的分類頁籤區分開。 */
+.topic-tabs{display:flex;gap:3px;flex-wrap:wrap;padding:4px;border-radius:14px;background:var(--panel-inset);border:1px solid rgba(255,255,255,.16)}
+.topic-tabs button{border:0;border-radius:10px;padding:9px 16px;background:transparent;color:var(--muted);font-size:17px;font-weight:800;white-space:nowrap}
+.topic-tabs button small{margin-left:6px;font-size:13px;font-weight:600;opacity:.8}
+.topic-tabs button:hover:not(.active){color:var(--ink);background:var(--panel)}
+.topic-tabs button.active{background:#fff;color:#2b1759}
+.group-tabs{display:flex;gap:8px;flex-wrap:wrap}
 .group-tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 17px;font-size:16px;font-weight:750}
 .group-tabs button small{margin-left:6px;font-size:13px;font-weight:600;opacity:.8}
 .group-tabs button:hover:not(.active){background:var(--panel-hover)}
@@ -117,6 +124,7 @@ a{color:inherit}
 .vocab-table{width:100%;border-collapse:collapse;font-size:calc(17px * var(--fontup))}
 .vocab-table th,.vocab-table td{border-bottom:1px solid rgba(255,255,255,.16);padding:10px 12px;text-align:left;vertical-align:top;line-height:1.55}
 .vocab-table thead th{background:var(--panel-inset);white-space:nowrap;font-size:15px}
+.vocab-table.no-pos th:nth-child(2),.vocab-table.no-pos td:nth-child(2),.vocab-table.no-audio th:nth-child(5),.vocab-table.no-audio td:nth-child(5){display:none}
 .vocab-table td:first-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .vocab-table td:nth-child(2){white-space:nowrap;color:var(--sage-light)}
 .vocab-table .list-word{border:0;background:none;padding:0;color:var(--ink);font-size:calc(21px * var(--fontup));font-weight:800;text-align:left;border-bottom:2px dotted var(--amber)}
@@ -124,6 +132,31 @@ a{color:inherit}
 .vocab-table .pinyin-cell{font-family:var(--font-pinyin);color:var(--amber-light);font-size:calc(19px * var(--fontup));white-space:nowrap}
 .vocab-table .pinyin-cell small{display:block;color:var(--muted);font-size:.72em}
 .vocab-table td:last-child{color:rgba(255,255,255,.86);font-size:.9em;min-width:12em}
+
+/* ── 補充區（參考圖） ── */
+.extra-button{margin-left:auto;border:1px solid var(--sage-light);background:rgba(111,168,156,.20);color:var(--ink);border-radius:999px;padding:9px 17px;font-size:16px;font-weight:750;white-space:nowrap}
+.extra-button:hover{background:rgba(111,168,156,.38)}
+.extra-button.active{background:var(--sage);border-color:var(--sage);color:var(--on-sage)}
+.extra-view{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:clamp(14px,2vw,24px)}
+.extra-view h2{margin:0 0 10px;font-size:clamp(21px,2.2vw,28px);letter-spacing:.04em}
+.extra-notice{background:var(--panel-inset);border-left:4px solid var(--amber);border-radius:10px;padding:10px 16px;margin-bottom:16px}
+.extra-notice p{margin:4px 0;font-size:15px;line-height:1.75;color:rgba(255,255,255,.92)}
+.extra-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:13px}
+.extra-card{display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:9px 9px 11px;color:var(--ink)}
+.extra-card:hover{background:var(--panel-hover);border-color:var(--amber-light)}
+.extra-card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#fff}
+.extra-card strong{font-size:16px}
+.extra-card small{font-size:13px;color:var(--muted)}
+.viewer{width:min(760px,96vw);max-height:96vh;display:flex;flex-direction:column;gap:8px;padding:16px 20px}
+.viewer .dialog-top{padding-bottom:7px}
+.viewer h2{font-size:23px}
+.viewer-meta{display:block;margin-top:2px;font-size:14px;color:#5d4f85}
+.viewer-note{margin:0;padding:8px 13px;border-radius:9px;background:#fff3d6;color:#5c3d00;font-size:15px;line-height:1.65}
+.viewer-stage{display:flex;align-items:center;justify-content:center;gap:8px;min-height:0}
+.viewer-stage img{min-width:0;max-width:calc(100% - 110px);max-height:calc(96vh - 150px);object-fit:contain;border-radius:10px;background:#fff}
+.viewer.has-note .viewer-stage img{max-height:calc(96vh - 240px)}
+.viewer-nav{flex:none;width:46px;height:64px;border:1px solid var(--dialog-line);border-radius:12px;background:#ece6f8;color:var(--dialog-ink);font-size:30px;line-height:1}
+.viewer-nav:hover{background:#ddd3f3}
 
 /* ── 頁尾 ── */
 .foot{display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;padding:8px clamp(14px,3vw,36px) 22px;font-size:12px;text-shadow:0 1px 3px rgba(40,0,90,.75)}
@@ -155,12 +188,16 @@ a{color:inherit}
   .card-nav button{font-size:15px;padding:10px 12px}
   .reveal{font-size:20px}
   .foot-keys{display:none}
+  .extra-button{margin-left:0}
+  .viewer-stage img{max-width:calc(100% - 84px)}
+  .viewer-nav{width:34px;height:54px;font-size:25px}
 }
 /* 矮螢幕（例如 1366×768 的教室投影）：收緊間距，讓整張卡片留在一個畫面內。 */
 @media(max-height:820px) and (min-width:701px){
   .topbar{padding-top:9px;padding-bottom:9px}
-  .group-tabs{padding-top:9px}
-  .group-tabs button{padding:7px 16px}
+  .filter-row{padding-top:9px}
+  .topic-tabs button{padding:7px 14px;font-size:16px}
+  .group-tabs button{padding:7px 14px}
   .main{padding-top:10px;padding-bottom:8px}
   .card-main{gap:9px;padding:13px 22px}
   .word-area{padding:12px 20px;gap:3px;min-height:0}
@@ -177,7 +214,7 @@ a{color:inherit}
   body::before{display:none}
   html,body{background:#fff;color:#000}
   :root{--ink:#000;--muted:#444;--panel:#fff;--panel-inset:#fff;--line:#999;--amber-light:#333;--sage-light:#333}
-  .top-actions,.group-tabs,.card-actions,.foot-keys{display:none!important}
+  .top-actions,.filter-row,.card-actions,.foot-keys{display:none!important}
   .foot{text-shadow:none}
 }
 

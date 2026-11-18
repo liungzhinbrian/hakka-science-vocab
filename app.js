@@ -10,7 +10,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const DATA = window.VOCAB_DATA;
-  if (!DATA || !Array.isArray(DATA.words)) {
+  if (!DATA || !Array.isArray(DATA.topics) || !DATA.topics.length) {
     $('main').textContent = '找不到 vocab-data.js，請確認檔案與 index.html 放在同一資料夾。';
     return;
   }
@@ -27,8 +27,14 @@
   const SUPERSCRIPT = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
   const DIALECTS = { hailu: '海陸腔', sixian: '四縣腔' };
 
-  const state = { dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
+  const TOPICS = DATA.topics;
+  // 網址加上 ?topic=主題代號（例如 ?topic=chem）可以直接開啟某個主題。
+  const wantedTopic = new URLSearchParams(location.search).get('topic');
+  const state = { topic: TOPICS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
+  const topic = () => TOPICS.find(t => t.id === state.topic) || TOPICS[0];
 
+  // 單一檔預覽版會把圖檔內嵌在 window.__ASSET；正式網站直接用路徑。
+  const asset = path => (window.__ASSET && window.__ASSET[path]) || path;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* 資料一律存調值；只在顯示時轉成上標數字或調型符號。
@@ -43,17 +49,18 @@
     });
   }
 
-  const groupLabel = id => id === 'all' ? '全部' : (DATA.groups.find(g => g.id === id)?.label ?? id);
-  const wordsIn = id => id === 'all' ? DATA.words : DATA.words.filter(w => w.group === id);
+  const groupLabel = id => id === 'all' ? '全部' : ((topic().groups || []).find(g => g.id === id)?.label ?? id);
+  const wordsIn = id => id === 'all' ? topic().words : topic().words.filter(w => w.group === id);
   const currentWords = () => wordsIn(state.group);
   const entryOf = (word, dialect = state.dialect) => word[dialect] || null;
 
   /* ── 音檔：只在按下按鈕時播放，換詞不自動播放。 ── */
   const AUDIO = window.VOCAB_AUDIO || null;
   const audioKey = (word, dialect, alt) => {
-    if (!AUDIO) return '';
+    const set = AUDIO && AUDIO.topics && AUDIO.topics[state.topic];
+    if (!set) return '';
     const key = String(word.id).padStart(2, '0') + (alt ? '-alt' : '');
-    return (AUDIO[dialect] || []).includes(key) ? `${dialect}/${key}` : '';
+    return (set[dialect] || []).includes(key) ? `${set.dir ? set.dir + '/' : ''}${dialect}/${key}` : '';
   };
   const audioUrl = key => (AUDIO.inline && AUDIO.inline[key]) || `${AUDIO.base}/${key}.${AUDIO.ext}`;
   const audioButtons = (word, dialect) => {
@@ -98,7 +105,20 @@
     meaningToggle.setAttribute('aria-pressed', String(state.showAll));
     meaningToggle.classList.toggle('active', state.showAll);
     $('app').style.setProperty('--fontup', state.fontUp);
-    $('groupTabs').innerHTML = [{ id: 'all' }, ...DATA.groups].map(g => {
+    $('topicTabs').innerHTML = TOPICS.map(t => {
+      const on = t.id === state.topic;
+      return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(t.label)}<small>${t.words.length}</small></button>`;
+    }).join('');
+    $('siteSub').textContent = `${topic().label}詞彙`;
+    const extras = topic().extras, extraBtn = $('extraBtn');
+    if (!extras && state.view === 'extra') state.view = 'card';
+    extraBtn.hidden = !extras;
+    extraBtn.textContent = extras ? extras.label : '';
+    extraBtn.classList.toggle('active', state.view === 'extra');
+    extraBtn.setAttribute('aria-pressed', String(state.view === 'extra'));
+    const groups = topic().groups || [];
+    $('groupTabs').hidden = !groups.length || state.view === 'extra';   // 主題沒有分類、或正在看補充區時，不顯示分類頁籤
+    $('groupTabs').innerHTML = [{ id: 'all' }, ...groups].map(g => {
       const on = g.id === state.group;
       return `<button type="button" data-group="${esc(g.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(groupLabel(g.id))}<small>${wordsIn(g.id).length}</small></button>`;
     }).join('');
@@ -112,7 +132,7 @@
     state.idx = Math.max(0, Math.min(words.length - 1, state.idx));
     const word = words[state.idx];
     const entry = entryOf(word);
-    $('cardProgress').textContent = `${DIALECTS[state.dialect]}・${groupLabel(state.group)}・第${state.idx + 1}／${words.length}詞`;
+    $('cardProgress').textContent = `${DIALECTS[state.dialect]}・${state.group === 'all' ? topic().label : groupLabel(state.group)}・第${state.idx + 1}／${words.length}詞`;
     $('cardPos').textContent = word.pos ? `【${word.pos}】` : '';
     $('cardPos').hidden = !word.pos;
     $('cardHan').textContent = entry ? entry.han : '（此腔調尚未建立資料）';
@@ -121,7 +141,7 @@
     alt.hidden = !(entry && entry.alt);
     alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
     // 播放鈕只在換了詞或腔調時重畫，揭曉答案時不打斷正在播放的音檔。
-    const audioBox = $('cardAudio'), audioId = `${state.dialect}/${word.id}`;
+    const audioBox = $('cardAudio'), audioId = `${state.topic}/${state.dialect}/${word.id}`;
     if (audioBox.dataset.for !== audioId) {
       audioBox.dataset.for = audioId;
       audioBox.innerHTML = entry ? audioButtons(word, state.dialect) : '';
@@ -150,6 +170,9 @@
   }
 
   function renderList() {
+    const table = document.querySelector('.vocab-table');
+    table.classList.toggle('no-pos', !topic().words.some(w => w.pos));        // 整個主題都沒標詞性時，隱藏詞性欄
+    table.classList.toggle('no-audio', !topic().words.some(w => audioKey(w, state.dialect, false)));  // 還沒有音檔時，隱藏讀音欄
     $('listBody').innerHTML = currentWords().map(word => {
       const entry = entryOf(word);
       const pinyin = entry ? esc(formatPinyin(entry.pinyin, state.dialect)) : '';
@@ -165,7 +188,34 @@
     renderControls();
     $('cardView').hidden = state.view !== 'card';
     $('listView').hidden = state.view !== 'list';
-    if (state.view === 'card') renderCard(); else renderList();
+    $('extraView').hidden = state.view !== 'extra';
+    if (state.view === 'card') renderCard(); else if (state.view === 'list') renderList(); else renderExtra();
+  }
+
+  /* ── 補充區（參考圖）：縮圖用靜態圖，點開才載入動態圖。 ── */
+  function renderExtra() {
+    const extras = topic().extras; if (!extras) return;
+    $('extraTitle').textContent = extras.title || extras.label;
+    $('extraNotice').innerHTML = (extras.notice || []).map(line => `<p>${esc(line)}</p>`).join('');
+    $('extraGrid').innerHTML = extras.items.map((item, i) => `<button type="button" class="extra-card" data-extra-open="${i}"><img src="${esc(asset(item.thumb || item.src))}" alt="" loading="lazy"><strong>${esc(item.title)}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</button>`).join('');
+  }
+  let viewerIndex = -1;
+  function showViewer(i) {
+    const items = topic().extras ? topic().extras.items : []; if (!items.length) return;
+    viewerIndex = (i + items.length) % items.length;
+    const item = items[viewerIndex];
+    $('viewerTitle').textContent = item.title;
+    $('viewerMeta').textContent = [item.time, `第${viewerIndex + 1}／${items.length}張`].filter(Boolean).join('　');
+    const note = $('viewerNote'); note.hidden = !item.note; note.textContent = item.note || '';
+    document.querySelector('.viewer').classList.toggle('has-note', Boolean(item.note));
+    const img = $('viewerImg'); img.src = asset(item.src); img.alt = `${item.title}示意圖`;
+    $('viewerOverlay').hidden = false;
+  }
+  function closeViewer() {
+    if ($('viewerOverlay').hidden) return;
+    $('viewerOverlay').hidden = true; $('viewerImg').removeAttribute('src');
+    document.querySelector(`[data-extra-open="${viewerIndex}"]`)?.focus();
+    viewerIndex = -1;
   }
 
   /* ── 詞彙卡操作 ── */
@@ -204,11 +254,16 @@
   /* ── 事件 ── */
   document.addEventListener('click', e => {
     if (e.target === $('dialogOverlay') || e.target.closest('#dialogClose')) { closeDialog(); return; }
+    if (e.target === $('viewerOverlay')) { closeViewer(); return; }
     const t = e.target.closest('button'); if (!t) return;
     // 用滑鼠或觸控操作後，把焦點放回「揭曉」鈕，接著按空白鍵就能揭曉；
     // 用鍵盤操作（e.detail 為 0）時不移動焦點，維持原本的操作位置。
     const refocus = () => { if (e.detail > 0 && state.view === 'card' && !state.showAll) $('revealBtn').focus({ preventScroll: true }); };
+    if (t.dataset.viewer) { if (t.dataset.viewer === 'close') closeViewer(); else showViewer(viewerIndex + (t.dataset.viewer === 'next' ? 1 : -1)); return; }
+    if (t.dataset.extraOpen) { showViewer(Number(t.dataset.extraOpen)); document.querySelector('[data-viewer="close"]').focus(); return; }
+    if (t.id === 'extraBtn') { state.view = state.view === 'extra' ? 'card' : 'extra'; render(); return; }
     if (t.dataset.audioKey) { playAudio(t.dataset.audioKey, t); refocus(); return; }
+    if (t.dataset.topic) { state.topic = t.dataset.topic; state.group = 'all'; state.idx = 0; state.shown = false; render(); refocus(); return; }
     if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }
     if (t.dataset.tone) { state.toneMode = t.dataset.tone; render(); refocus(); return; }
     if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
@@ -229,6 +284,12 @@
   });
 
   document.addEventListener('keydown', e => {
+    if (!$('viewerOverlay').hidden) {
+      if (e.key === 'Escape') closeViewer();
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); showViewer(viewerIndex - 1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); showViewer(viewerIndex + 1); }
+      return;
+    }
     if (e.key === 'Escape') { closeDialog(); return; }
     // 凡例或語音工具開著時，不讓方向鍵、空白鍵去翻後面的詞彙卡。
     if (document.querySelector('.dialog-overlay:not([hidden]), .phonology-overlay:not([hidden])')) return;
@@ -245,7 +306,6 @@
 
   /* ── 啟動 ── */
   $('siteTitle').textContent = DATA.title || '客語詞彙';
-  $('siteSub').textContent = DATA.subtitle || '';
   $('siteVersion').textContent = DATA.version || '';
   document.title = [DATA.title, DATA.version].filter(Boolean).join('｜');
   $('footInfo').textContent = [[DATA.school, DATA.course].filter(Boolean).join('　'), DATA.term, DATA.teachers, DATA.credit].filter(Boolean).join('｜');

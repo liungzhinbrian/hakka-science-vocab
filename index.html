@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1b5e51">
-  <meta name="description" content="生活中的科學　客語詞彙篇：擂茶客語詞彙互動學習網站。海陸腔與四縣腔、逐詞讀音、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
-  <title>生活中的科學　客語詞彙篇｜V1.2.0</title>
+  <meta name="description" content="生活中的科學　客語詞彙篇：擂茶、傳統醫學與養生、化學實驗的客語詞彙互動學習網站。海陸腔與四縣腔、逐詞讀音、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
+  <title>生活中的科學　客語詞彙篇｜V1.3.0</title>
   <link rel="stylesheet" href="styles.css">
   <script src="vocab-data.js" defer></script>
   <script src="audio-manifest.js" defer></script>
@@ -21,7 +21,7 @@
         <span class="brand-mark" aria-hidden="true">客</span>
         <div class="brand-text">
           <strong id="siteTitle">生活中的科學　客語詞彙篇</strong>
-          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.2.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
+          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.3.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
         </div>
       </div>
       <div class="top-actions">
@@ -45,7 +45,11 @@
       </div>
     </header>
 
-    <nav class="group-tabs" id="groupTabs" aria-label="詞彙分類"></nav>
+    <div class="filter-row">
+      <nav class="topic-tabs" id="topicTabs" aria-label="主題"></nav>
+      <nav class="group-tabs" id="groupTabs" aria-label="詞彙分類"></nav>
+      <button type="button" id="extraBtn" class="extra-button" aria-pressed="false" hidden></button>
+    </div>
 
     <main class="main" id="main">
       <section id="cardView" class="card-layout" aria-label="詞彙卡">
@@ -85,6 +89,12 @@
           </table>
         </div>
       </section>
+
+      <section id="extraView" class="extra-view" aria-labelledby="extraTitle" hidden>
+        <h2 id="extraTitle"></h2>
+        <div id="extraNotice" class="extra-notice"></div>
+        <div id="extraGrid" class="extra-grid"></div>
+      </section>
     </main>
 
     <footer class="foot">
@@ -97,6 +107,18 @@
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
       <div class="dialog-top"><h2 id="dialogTitle"></h2><button type="button" id="dialogClose" class="icon-button" aria-label="關閉">×</button></div>
       <div id="dialogContent"></div>
+    </div>
+  </div>
+
+  <div id="viewerOverlay" class="dialog-overlay viewer-overlay" hidden>
+    <div class="dialog viewer" role="dialog" aria-modal="true" aria-labelledby="viewerTitle">
+      <div class="dialog-top"><div><h2 id="viewerTitle"></h2><span id="viewerMeta" class="viewer-meta"></span></div><button type="button" class="icon-button" data-viewer="close" aria-label="關閉">×</button></div>
+      <p id="viewerNote" class="viewer-note" hidden></p>
+      <div class="viewer-stage">
+        <button type="button" class="viewer-nav" data-viewer="prev" aria-label="上一張">‹</button>
+        <img id="viewerImg" alt="">
+        <button type="button" class="viewer-nav" data-viewer="next" aria-label="下一張">›</button>
+      </div>
     </div>
   </div>
 
