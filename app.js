@@ -30,8 +30,12 @@
   const TOPICS = DATA.topics;
   // 網址加上 ?topic=主題代號（例如 ?topic=chem）可以直接開啟某個主題。
   const wantedTopic = new URLSearchParams(location.search).get('topic');
-  const state = { topic: TOPICS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
-  const topic = () => TOPICS.find(t => t.id === state.topic) || TOPICS[0];
+  // 「所有詞彙」：把各主題的詞彙接在一起看，不分主題、也不分類。網址用 ?topic=all。
+  for (const t of TOPICS) for (const w of t.words) { w._topic = t.id; w._topicLabel = t.label; w._uid = `${t.id}/${w.id}`; }
+  const ALL_TOPIC = { id: 'all', label: '所有詞彙', groups: [], words: TOPICS.flatMap(t => t.words) };
+  const TOPIC_TABS = [...TOPICS, ALL_TOPIC];
+  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
+  const topic = () => TOPIC_TABS.find(t => t.id === state.topic) || TOPICS[0];
 
   // 單一檔預覽版會把圖檔內嵌在 window.__ASSET；正式網站直接用路徑。
   const asset = path => (window.__ASSET && window.__ASSET[path]) || path;
@@ -57,7 +61,7 @@
   /* ── 音檔：只在按下按鈕時播放，換詞不自動播放。 ── */
   const AUDIO = window.VOCAB_AUDIO || null;
   const audioKey = (word, dialect, alt) => {
-    const set = AUDIO && AUDIO.topics && AUDIO.topics[state.topic];
+    const set = AUDIO && AUDIO.topics && AUDIO.topics[word._topic];   // 音檔跟著詞彙原本所屬的主題走
     if (!set) return '';
     const key = String(word.id).padStart(2, '0') + (alt ? '-alt' : '');
     return (set[dialect] || []).includes(key) ? `${set.dir ? set.dir + '/' : ''}${dialect}/${key}` : '';
@@ -105,11 +109,11 @@
     meaningToggle.setAttribute('aria-pressed', String(state.showAll));
     meaningToggle.classList.toggle('active', state.showAll);
     $('app').style.setProperty('--fontup', state.fontUp);
-    $('topicTabs').innerHTML = TOPICS.map(t => {
+    $('topicTabs').innerHTML = TOPIC_TABS.map(t => {
       const on = t.id === state.topic;
       return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(t.label)}<small>${t.words.length}</small></button>`;
     }).join('');
-    $('siteSub').textContent = `${topic().label}詞彙`;
+    $('siteSub').textContent = state.topic === 'all' ? topic().label : `${topic().label}詞彙`;
     const extras = topic().extras, extraBtn = $('extraBtn');
     if (!extras && state.view === 'extra') state.view = 'card';
     extraBtn.hidden = !extras;
@@ -132,7 +136,7 @@
     state.idx = Math.max(0, Math.min(words.length - 1, state.idx));
     const word = words[state.idx];
     const entry = entryOf(word);
-    $('cardProgress').textContent = `${DIALECTS[state.dialect]}・${state.group === 'all' ? topic().label : groupLabel(state.group)}・第${state.idx + 1}／${words.length}詞`;
+    $('cardProgress').textContent = `${DIALECTS[state.dialect]}・${state.group === 'all' ? topic().label : groupLabel(state.group)}・第${state.idx + 1}／${words.length}詞${state.topic === 'all' ? `（${word._topicLabel}）` : ''}`;
     $('cardPos').textContent = word.pos ? `【${word.pos}】` : '';
     $('cardPos').hidden = !word.pos;
     $('cardHan').textContent = entry ? entry.han : '（此腔調尚未建立資料）';
@@ -141,7 +145,7 @@
     alt.hidden = !(entry && entry.alt);
     alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
     // 播放鈕只在換了詞或腔調時重畫，揭曉答案時不打斷正在播放的音檔。
-    const audioBox = $('cardAudio'), audioId = `${state.topic}/${state.dialect}/${word.id}`;
+    const audioBox = $('cardAudio'), audioId = `${state.dialect}/${word._uid}`;
     if (audioBox.dataset.for !== audioId) {
       audioBox.dataset.for = audioId;
       audioBox.innerHTML = entry ? audioButtons(word, state.dialect) : '';
@@ -172,14 +176,15 @@
   function renderList() {
     const table = document.querySelector('.vocab-table');
     table.classList.toggle('no-pos', !topic().words.some(w => w.pos));        // 整個主題都沒標詞性時，隱藏詞性欄
+    table.classList.toggle('show-topic', state.topic === 'all');              // 「所有詞彙」才顯示主題欄
     table.classList.toggle('no-audio', !topic().words.some(w => audioKey(w, state.dialect, false)));  // 還沒有音檔時，隱藏讀音欄
-    $('listBody').innerHTML = currentWords().map(word => {
+    $('listBody').innerHTML = currentWords().map((word, index) => {
       const entry = entryOf(word);
       const pinyin = entry ? esc(formatPinyin(entry.pinyin, state.dialect)) : '';
       const alt = entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '';
-      return `<tr><td>${esc(word.id)}</td><td>${esc(word.pos || '')}</td>`
-        + `<td><button type="button" class="list-word" data-open="${esc(word.id)}" lang="hak">${esc(entry ? entry.han : '—')}</button></td>`
-        + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td class="audio-cell">${entry ? audioButtons(word, state.dialect) : ''}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
+      return `<tr><td>${state.topic === 'all' ? index + 1 : esc(word.id)}</td><td class="col-topic">${esc(word._topicLabel)}</td><td class="col-pos">${esc(word.pos || '')}</td>`
+        + `<td><button type="button" class="list-word" data-open="${esc(word._uid)}" lang="hak">${esc(entry ? entry.han : '—')}</button></td>`
+        + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td class="audio-cell col-audio">${entry ? audioButtons(word, state.dialect) : ''}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
     }).join('');
   }
 
@@ -269,7 +274,7 @@
     if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
     if (t.dataset.group) { state.group = t.dataset.group; state.idx = 0; state.shown = false; render(); refocus(); return; }
     if (t.dataset.open) {
-      const i = currentWords().findIndex(w => String(w.id) === t.dataset.open);
+      const i = currentWords().findIndex(w => w._uid === t.dataset.open);
       if (i >= 0) { state.idx = i; state.shown = false; state.view = 'card'; render(); if (!state.showAll) $('revealBtn').focus(); }
       return;
     }
