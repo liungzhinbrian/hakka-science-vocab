@@ -89,7 +89,14 @@ a{color:inherit}
 .card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:17px}
 .pos-tag{background:var(--sage);color:var(--on-sage);border-radius:999px;padding:5px 14px;font-size:16px;font-weight:750}
 .word-area{flex:1;min-height:min(40vh,430px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;background:var(--panel-inset);border-radius:var(--radius);padding:20px}
-.han{font-family:var(--font-han);font-size:calc(clamp(54px,min(7.4vw,12.5vh),112px) * var(--fontup));font-weight:850;line-height:1.18;overflow-wrap:anywhere}
+.han-row{display:flex;align-items:center;justify-content:center;gap:0 .28em;flex-wrap:wrap;font-size:calc(clamp(54px,min(7.4vw,12.5vh),112px) * var(--fontup))}
+.han{font-family:var(--font-han);font-size:1em;font-weight:850;line-height:1.18;overflow-wrap:anywhere}
+/* 色票：圓的大小跟著漢字字級走；多個色號時並排、略小。淺色外框讓黑、白也看得出形狀。 */
+.swatches{display:flex;align-items:center;gap:.1em}
+.swatch{width:.86em;height:.86em;border-radius:50%;border:.028em solid rgba(255,255,255,.62)}
+.swatches.multi .swatch{width:.66em;height:.66em}
+.vocab-table .dots{white-space:nowrap}
+.vocab-table .dot{display:inline-block;width:.78em;height:.78em;margin-left:.34em;border-radius:50%;border:1px solid rgba(255,255,255,.62);vertical-align:-.06em;font-size:calc(21px * var(--fontup))}
 .pinyin{font-family:var(--font-pinyin);font-size:calc(clamp(27px,min(3.5vw,6vh),50px) * var(--fontup));color:var(--amber-light);line-height:1.45;overflow-wrap:anywhere}
 .pinyin-row{display:flex;align-items:center;justify-content:center;gap:8px 18px;flex-wrap:wrap}
 .audio-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}

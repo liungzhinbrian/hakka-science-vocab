@@ -93,6 +93,10 @@
     audio.play().catch(() => finish(true));
   }
 
+  /* ── 色票：顏色詞在漢字旁顯示圓形色塊，一律顯示（不必揭曉）。只接受 #RGB／#RRGGBB 色號。 ── */
+  const swatchColors = word => (word.colors || []).filter(c => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c));
+  const swatchHTML = (word, cls) => swatchColors(word).map(c => `<span class="${cls}" style="background:${c}"></span>`).join('');
+
   /* ── 畫面更新 ── */
   function renderControls() {
     const sync = (attr, value) => document.querySelectorAll(`[data-${attr}]`).forEach(el => {
@@ -140,6 +144,8 @@
     $('cardPos').textContent = word.pos ? `【${word.pos}】` : '';
     $('cardPos').hidden = !word.pos;
     $('cardHan').textContent = entry ? entry.han : '（此腔調尚未建立資料）';
+    const swatch = $('cardSwatch'), colorCount = swatchColors(word).length;
+    swatch.innerHTML = swatchHTML(word, 'swatch'); swatch.hidden = !colorCount; swatch.classList.toggle('multi', colorCount > 1);
     $('cardPinyin').textContent = entry ? formatPinyin(entry.pinyin, state.dialect) : '';
     const alt = $('cardAlt');
     alt.hidden = !(entry && entry.alt);
@@ -183,7 +189,7 @@
       const pinyin = entry ? esc(formatPinyin(entry.pinyin, state.dialect)) : '';
       const alt = entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '';
       return `<tr><td>${state.topic === 'all' ? index + 1 : esc(word.id)}</td><td class="col-topic">${esc(word._topicLabel)}</td><td class="col-pos">${esc(word.pos || '')}</td>`
-        + `<td><button type="button" class="list-word" data-open="${esc(word._uid)}" lang="hak">${esc(entry ? entry.han : '—')}</button></td>`
+        + `<td><button type="button" class="list-word" data-open="${esc(word._uid)}" lang="hak">${esc(entry ? entry.han : '—')}</button><span class="dots" aria-hidden="true">${swatchHTML(word, 'dot')}</span></td>`
         + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td class="audio-cell col-audio">${entry ? audioButtons(word, state.dialect) : ''}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
     }).join('');
   }
