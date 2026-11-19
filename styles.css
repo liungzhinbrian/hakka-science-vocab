@@ -314,6 +314,9 @@ body.theme-tech .foot{text-shadow:none}
 .pt.has-focus .pt-el:not(.hl),.pt.has-focus .pt-series:not(.hl){opacity:.22}
 .pt .pt-el.hl,.pt .pt-series.hl{animation:pt-blink 1.1s ease-in-out infinite}
 @keyframes pt-blink{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 0 4px rgba(var(--c),.3);filter:brightness(.85)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 20px rgba(var(--c),.95),0 0 0 1px rgb(var(--c));filter:brightness(1.45)}}
+@media(max-width:1700px){ .pt-detail{gap:clamp(10px,1.3vw,20px);padding:6px 16px} .pt-reading{gap:8px 10px} .pt-detail .audio-btn{padding:4px 10px} }
+/* 1024 寬的舊投影機：表格縮到剛好放進畫面，面板再收緊一些 */
+@media(max-width:1100px) and (min-width:701px){ .pt{min-width:920px;gap:3px} .ptable-view{--cell-h:clamp(40px,calc((100vh - 336px) / 9.5),84px)} .pt-detail{gap:8px;padding:4px 10px;margin:0 3px 22px} .pt-name .han{font-size:calc(var(--cell-h) * 1.05)} .pt-reading .pinyin{font-size:clamp(18px,calc(var(--cell-h) * .5),40px)} .pt-zh .zhuyin{font-size:clamp(17px,calc(var(--cell-h) * .46),40px)} .pt-detail .audio-btn{padding:3px 8px;font-size:12px} }
 @media(max-width:700px){ .ptable-view{--cell-h:56px} }
 @media(prefers-reduced-motion:reduce){ .pt-el:hover{transform:none} }
 @media print{ .topic-notice{display:none!important} }
