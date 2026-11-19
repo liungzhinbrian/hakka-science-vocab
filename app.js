@@ -39,7 +39,7 @@
   const TOPIC_TABS = [ALL_TOPIC, ...TOPICS];
   // 主題列與標題下方顯示的名稱：詞彙主題加上「詞彙」兩字。
   const tabLabel = t => t.id === 'all' || isPeriodic(t) ? t.label : `${t.label}詞彙`;
-  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1, el: 1 };
+  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1, el: 1, ptCat: '' };
   const topic = () => TOPIC_TABS.find(t => t.id === state.topic) || TOPICS[0];
   if (isPeriodic(topic())) state.view = 'ptable';
 
@@ -240,13 +240,20 @@
       html += `<div class="pt-group" style="grid-column:${col + 1};grid-row:${above + 1}">${g}</div>`; });
     for (const w of topic().words) {
       const [g, p] = ptPos(w.id), entry = entryOf(w);
-      html += `<button type="button" class="pt-el${w.id > 99 ? ' z3' : ''}" data-el="${w.id}" style="--c:${ptColor(cats, w.cat)};${at(g, p)}" aria-label="${w.id} ${esc(w.sym)} ${esc(entry ? entry.han : '')}"><span class="z">${w.id}</span><span class="sym">${esc(w.sym)}</span><span class="han" lang="hak">${esc(entry ? entry.han : '')}</span></button>`;
+      html += `<button type="button" class="pt-el${w.id > 99 ? ' z3' : ''}" data-el="${w.id}" data-cat="${esc(w.cat)}" style="--c:${ptColor(cats, w.cat)};${at(g, p)}" aria-label="${w.id} ${esc(w.sym)} ${esc(entry ? entry.han : '')}"><span class="z">${w.id}</span><span class="sym">${esc(w.sym)}</span><span class="han" lang="hak">${esc(entry ? entry.han : '')}</span></button>`;
     }
-    html += `<div class="pt-series" style="--c:${ptColor(cats, 'lanth')};${at(3, 6)}">57–71<br>鑭系</div><div class="pt-series" style="--c:${ptColor(cats, 'act')};${at(3, 7)}">89–103<br>錒系</div>`
+    html += `<div class="pt-series" data-cat="lanth" style="--c:${ptColor(cats, 'lanth')};${at(3, 6)}">57–71<br>鑭系</div><div class="pt-series" data-cat="act" style="--c:${ptColor(cats, 'act')};${at(3, 7)}">89–103<br>錒系</div>`
       + '<div class="pt-series-label" style="grid-column:1 / 5;grid-row:10">鑭系</div><div class="pt-series-label" style="grid-column:1 / 5;grid-row:11">錒系</div>';
     $('pt').innerHTML = html;
-    $('ptLegend').innerHTML = (topic().categories || []).map(c => `<span style="--c:${ptColor(cats, c.id)}"><i class="pt-dot"></i>${esc(c.label)}</span>`).join('');
-    renderElement();
+    $('ptLegend').innerHTML = (topic().categories || []).map(c => `<button type="button" data-pt-cat="${esc(c.id)}" aria-pressed="false" title="點一下，這一類元素會在表上閃爍；再點一次取消" style="--c:${ptColor(cats, c.id)}"><i class="pt-dot"></i>${esc(c.label)}</button>`).join('');
+    renderElement(); renderPtFocus();
+  }
+  // 點圖例：該類別的元素閃爍、其餘變暗，讓人看出它們在表上的位置。再點一次同一個類別，或按 Esc，就取消。
+  function renderPtFocus() {
+    if (!(topic().categories || []).some(c => c.id === state.ptCat)) state.ptCat = '';
+    $('pt').classList.toggle('has-focus', Boolean(state.ptCat));
+    $('pt').querySelectorAll('[data-cat]').forEach(el => el.classList.toggle('hl', Boolean(state.ptCat) && el.dataset.cat === state.ptCat));
+    $('ptLegend').querySelectorAll('[data-pt-cat]').forEach(b => { const on = b.dataset.ptCat === state.ptCat; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   }
   function renderElement() {
     const w = ptElement(state.el); if (!w) return;
@@ -260,7 +267,9 @@
     detail.style.setProperty('--c', ptColor(cats, w.cat));
     detail.innerHTML = `<div class="pt-name"><span class="han" lang="hak">${esc(entry ? entry.han : '')}</span><span class="en">${esc(w.en || '')}</span></div>`
       + `<div class="pt-meta"><span class="sym">${esc(w.sym)}</span><span class="z">原子序 ${w.id}${w.state ? '・' + esc(w.state) : ''}</span><span class="cat"><i class="pt-dot"></i>${esc(cats[w.cat] ? cats[w.cat].label : '')}</span></div>`
-      + `<div class="pt-hak"><div class="pt-reading"><span class="pt-dialect">${DIALECTS[state.dialect]}</span><span class="pinyin" lang="hak">${esc(entry ? formatPinyin(entry.pinyin, state.dialect) : '')}</span>${play}</div>${aka}</div>`;
+      // 左邊是客語讀音（與俗稱），右邊靠右放華語注音符號。
+      + `<div class="pt-hak"><div class="pt-hakka"><div class="pt-reading"><span class="pt-dialect">${DIALECTS[state.dialect]}</span><span class="pinyin" lang="hak">${esc(entry ? formatPinyin(entry.pinyin, state.dialect) : '')}</span>${play}</div>${aka}</div>`
+      + (w.zhuyin ? `<div class="pt-zh"><span class="pt-dialect">華語</span><span class="zhuyin" lang="zh-Hant-TW">${esc(w.zhuyin)}</span></div>` : '') + '</div>';
   }
   function selectElement(z, moveFocus) {
     const ids = topic().words.map(w => w.id); if (!ids.length) return;
@@ -342,6 +351,7 @@
     if (t.id === 'extraBtn') { state.view = state.view === 'extra' ? 'card' : 'extra'; render(); return; }
     if (t.dataset.audioKey) { playAudio(t.dataset.audioKey, t); refocus(); return; }
     if (t.dataset.el) { selectElement(Number(t.dataset.el)); return; }
+    if (t.dataset.ptCat) { state.ptCat = state.ptCat === t.dataset.ptCat ? '' : t.dataset.ptCat; renderPtFocus(); return; }
     if (t.dataset.topic) {
       state.topic = t.dataset.topic; state.group = 'all'; state.idx = 0; state.shown = false;
       state.view = isPeriodic(topic()) ? 'ptable' : (state.view === 'ptable' ? 'card' : state.view);
@@ -373,7 +383,7 @@
       else if (e.key === 'ArrowRight') { e.preventDefault(); showViewer(viewerIndex + 1); }
       return;
     }
-    if (e.key === 'Escape') { closeDialog(); return; }
+    if (e.key === 'Escape') { if (!$('dialogOverlay').hidden) closeDialog(); else if (state.view === 'ptable' && state.ptCat) { state.ptCat = ''; renderPtFocus(); } return; }
     // 凡例或語音工具開著時，不讓方向鍵、空白鍵去翻後面的詞彙卡。
     if (document.querySelector('.dialog-overlay:not([hidden]), .phonology-overlay:not([hidden])')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
