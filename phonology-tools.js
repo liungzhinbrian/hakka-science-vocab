@@ -31,7 +31,9 @@ const rimeData=window.HakkaRimeData||null;let rimeBlock=0,selectedRime='a',rimeS
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function titleText(){document.getElementById('phonologyTitle').textContent=tab==='consonants'?'客語聲母互動表':tab==='vowels'?'新竹海陸腔元音表':tab==='rimes'?'新竹海陸腔韻母配字表':tab==='sandhi'?'客語連讀變調':tab==='references'?'聲調原始參考圖':'五度聲調互動圖';}
 function render(){titleText();document.querySelectorAll('[data-phon-tab]').forEach(x=>{const a=x.dataset.phonTab===tab;x.classList.toggle('active',a);x.setAttribute('aria-pressed',a)});document.querySelectorAll('[data-phon-dialect]').forEach(x=>{const a=x.dataset.phonDialect===dialect;x.classList.toggle('active',a);x.setAttribute('aria-pressed',a)});
- const hailuOnly=tab==='vowels'||tab==='rimes';const dialectBar=root.querySelector('.phonology-dialects');if(dialectBar)dialectBar.hidden=hailuOnly;
+ const hailuOnly=tab==='vowels'||tab==='rimes';
+ // 元音、韻母配字表只有海陸腔；原始圖表、連讀變調兩腔並列，內容不隨腔調切換。這四頁都不顯示腔調鈕，免得按了沒有反應。
+ const noDialect=hailuOnly||tab==='references'||tab==='sandhi';const dialectBar=root.querySelector('.phonology-dialects');if(dialectBar)dialectBar.hidden=noDialect;
  const modalityLabel=root.querySelector('.phonology-head .micro-label');if(modalityLabel)modalityLabel.textContent=hailuOnly?'新竹海陸腔・教師提供資料':'海陸腔／四縣腔';
  target.innerHTML=tab==='vowels'?renderVowels():tab==='rimes'?renderRimes():tab==='consonants'?renderInitials():tab==='references'?renderReferences():tab==='sandhi'?renderSandhi():renderTones();}
 function renderTones(){const rows=toneData[dialect],y=n=>218-(n-1)*42;
@@ -52,7 +54,9 @@ const moeFinal=f=>moeMap.finals[f]??f;
 // IPA的送氣符號一律上標：資料檔已用 ʰ；這裡再保險一次，也用來整理搜尋時輸入的字。
 const ipaShow=s=>String(s).replace(/^(p|t|k|ts|tʃ)h$/,'$1ʰ');
 // 元音表例字的寫法是「聲母－例字」，把聲母由IPA換成拼音。
-const moeExample=ex=>{const i=ex.indexOf('－');if(i<0)return ex;const head=ex.slice(0,i);return (moeMap.initials[head]??head)+ex.slice(i);};
+// 原表在例字後以「文」「白」「罕」標記文讀、白讀、罕用；顯示時加上括號，例如「林白」→「林（白）」。只處理「一個字＋標記」的寫法，雙字詞不動。
+const markReading=v=>{const a=[...String(v)];return a.length===2&&'文白罕'.includes(a[1])?`${a[0]}（${a[1]}）`:String(v);};
+const moeExample=ex=>{const i=ex.indexOf('－');if(i<0)return markReading(ex);const head=ex.slice(0,i);return (moeMap.initials[head]??head)+'－'+markReading(ex.slice(i+1));};
 function renderVowels(){
  if(!rimeData)return '<p>元音資料尚未載入，請重新開啟網站。</p>';
  const rows=rimeData.vowels.map(v=>`<tr><td>${escapeHTML(v.type)}</td><td class="pv-pinyin">${escapeHTML(v.name)}</td><td class="pv-ipa">[${escapeHTML(v.ipa)}]</td><td>${v.examples.length?escapeHTML(v.examples.map(moeExample).join('、')):'—'}</td><td>${escapeHTML(v.note||'—')}</td></tr>`).join('');
@@ -66,15 +70,15 @@ function renderRimes(){
  const tabs=blocks.map((x,i)=>`<button type="button" class="${i===rimeBlock?'active':''}" data-phon-block="${i}" aria-pressed="${i===rimeBlock}">${escapeHTML(x.label.split('｜')[0])}<small>${x.finals.length}韻</small></button>`).join('');
  const headBtns=b.finals.map(x=>`<button type="button" data-phon-rime="${escapeHTML(x)}" class="${x===selectedRime?'active':''}" aria-pressed="${x===selectedRime}" title="IPA [${escapeHTML(x)}]">${escapeHTML(moeFinal(x))}</button>`).join('');
  const col=b.finals.indexOf(selectedRime);const matches=rimeData.heads.map(h=>[h,b.rows[h][col]]).filter(x=>x[1]!=='○');
- const activeCards=matches.map(([h,word])=>`<div class="phon-rime-pair"><span class="phon-rime-initial">${initialLabel(h)}</span><span class="phon-rime-example">${escapeHTML(word)}</span></div>`).join('');
+ const activeCards=matches.map(([h,word])=>`<div class="phon-rime-pair"><span class="phon-rime-initial">${initialLabel(h)}</span><span class="phon-rime-example">${escapeHTML(markReading(word))}</span></div>`).join('');
  const first=`<section class="phon-rime-selection" aria-live="polite"><div><strong>韻母 <span class="phon-rime-name">${escapeHTML(moeFinal(selectedRime))}</span></strong> <span class="phon-rime-ipa">IPA [${escapeHTML(selectedRime)}]</span><p>本韻母在教師原表中的例字：${matches.length}筆。${matches.length===0?'原表未列例字。':''}</p></div><div class="phon-rime-pairs">${activeCards||'<em>○　未列例字</em>'}</div></section>`;
- const table=`<details class="phon-rime-matrix"><summary>展開${escapeHTML(b.label)}完整矩陣（可左右捲動）</summary><div class="phon-rime-scroll"><table class="phon-rime-table"><thead><tr><th scope="col">聲母＼韻母</th>${b.finals.map(f=>`<th scope="col" class="${f===selectedRime?'is-selected':''}"><button type="button" data-phon-rime="${escapeHTML(f)}" title="IPA [${escapeHTML(f)}]">${escapeHTML(moeFinal(f))}</button></th>`).join('')}</tr></thead><tbody>${rimeData.heads.map(h=>`<tr><th scope="row">${initialLabel(h)}</th>${b.rows[h].map((v,j)=>`<td class="${b.finals[j]===selectedRime?'is-selected':''} ${v==='○'?'is-empty':''}">${escapeHTML(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+ const table=`<details class="phon-rime-matrix"><summary>展開${escapeHTML(b.label)}完整矩陣（可左右捲動）</summary><div class="phon-rime-scroll"><table class="phon-rime-table"><thead><tr><th scope="col">聲母＼韻母</th>${b.finals.map(f=>`<th scope="col" class="${f===selectedRime?'is-selected':''}"><button type="button" data-phon-rime="${escapeHTML(f)}" title="IPA [${escapeHTML(f)}]">${escapeHTML(moeFinal(f))}</button></th>`).join('')}</tr></thead><tbody>${rimeData.heads.map(h=>`<tr><th scope="row">${initialLabel(h)}</th>${b.rows[h].map((v,j)=>`<td class="${b.finals[j]===selectedRime?'is-selected':''} ${v==='○'?'is-empty':''}">${escapeHTML(markReading(v))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
  let searchResults='';
  if(rimeSearch){
   // 以例字或教育部拼音搜尋；輸入含IPA專用符號（如 ŋ、ʃ、ɑ）時才比對原表的IPA，避免 p、t、k 這類字母兩套系統混在一起。
   const q=rimeSearch,ql=q.toLowerCase(),asIpa=/[^\x00-\x7F]/.test(q)&&!/[㐀-鿿\u{20000}-\u{3ffff}]/u.test(q);const found=[];
   blocks.forEach((bk,i)=>{rimeData.heads.forEach(h=>{bk.rows[h].forEach((v,j)=>{if(v==='○')return;const f=bk.finals[j];if(v.includes(q)||moeInitial(h).toLowerCase()===ql||moeFinal(f)===ql||(asIpa&&(h===ipaShow(q)||f===q))){found.push({i,f,h,v})}})})});
-  const view=found.slice(0,90);searchResults=`<section class="phon-rime-search-results"><h3>搜尋「${escapeHTML(q)}」：${found.length}筆</h3>${view.map(t=>`<button type="button" data-phon-search-result="${t.i}|${escapeHTML(t.f)}">${escapeHTML(moeInitial(t.h))}＋${escapeHTML(moeFinal(t.f))}：<strong>${escapeHTML(t.v)}</strong></button>`).join('')||'<p>沒有符合的例字。請更換關鍵字。</p>'}${found.length>90?'<p>結果較多，僅顯示前90筆。</p>':''}</section>`;}
+  const view=found.slice(0,90);searchResults=`<section class="phon-rime-search-results"><h3>搜尋「${escapeHTML(q)}」：${found.length}筆</h3>${view.map(t=>`<button type="button" data-phon-search-result="${t.i}|${escapeHTML(t.f)}">${escapeHTML(moeInitial(t.h))}＋${escapeHTML(moeFinal(t.f))}：<strong>${escapeHTML(markReading(t.v))}</strong></button>`).join('')||'<p>沒有符合的例字。請更換關鍵字。</p>'}${found.length>90?'<p>結果較多，僅顯示前90筆。</p>':''}</section>`;}
  return `<p class="phonology-note">收錄教師提供的5張聲韻配字表，共${finals}欄韻母。可按「表一～表五」切換，再點韻母查看例字；完整對照矩陣可展開。聲母、韻母以教育部拼音顯示，方括號內是原表的IPA。</p><div class="phon-rime-toolbar"><label for="phonRimeQuery">搜尋例字、聲母或韻母（教育部拼音）</label><input type="search" id="phonRimeQuery" placeholder="例如：粄、iang、c" value="${escapeHTML(rimeSearch)}" autocomplete="off"><button type="button" data-phon-action="find-rime">搜尋</button><button type="button" data-phon-action="clear-rime">清除</button></div>${searchResults}<div class="phon-rime-block-tabs">${tabs}</div><h3 class="phon-rime-block-heading">${escapeHTML(b.label)}</h3><div class="phon-rime-list">${headBtns}</div>${first}${table}<p class="phonology-note">${escapeHTML(rimeData.legend)}</p><p class="phonology-note">這是「新竹海陸腔」的教師自編配字參考表，沒有同步提供四縣腔版本，因此此頁不隨上方腔調切換。原表以IPA記錄聲母與韻母，本頁依教育部臺灣客語拼音方案轉寫顯示。[a]與[ɑ]在拼音方案同寫作a；[ŋ]與[ɲ]同寫作ng，因此聲母ng有兩列，以方括號內的IPA區別。</p>`;
 }
 document.getElementById('phonologyLaunch')?.addEventListener('click',()=>{root.hidden=false;render();document.getElementById('phonologyClose').focus();});

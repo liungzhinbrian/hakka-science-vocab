@@ -217,6 +217,20 @@ a{color:inherit}
   .card-nav button{padding:8px 18px}
   .foot{padding-bottom:16px}
 }
+/* 主題列加上「詞彙」兩字並多了元素週期表之後變長（V2.1.0）：一般筆電與投影寬度下收緊頁籤，讓主題與分類維持在同一列；
+   更窄時省略主題頁籤上的詞數。 */
+@media(max-width:1600px) and (min-width:701px){
+  .filter-row{gap:8px 10px}
+  .topic-tabs button{padding:7px 10px;font-size:15px}
+  .topic-tabs button small{margin-left:4px;font-size:12px}
+  .group-tabs{gap:6px}
+  .group-tabs button{padding:7px 11px;font-size:15px}
+  .group-tabs button small{margin-left:4px;font-size:12px}
+  .extra-button{padding:7px 12px;font-size:15px}
+}
+@media(max-width:1300px) and (min-width:701px){
+  .topic-tabs button small{display:none}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{
   body::before{display:none}
@@ -232,6 +246,70 @@ a{color:inherit}
 /* V1.1.1：韻母配字表以教育部拼音為主，方括號內的IPA用小字附註。 */
 .phon-rime-initial small,.phon-rime-table th small{display:block;margin-top:1px;font-size:11px;font-weight:400;color:#6a5c8f;white-space:nowrap}
 .phon-rime-ipa{margin-left:8px;font-size:14px;color:#6a5c8f}
+
+/* ══════════ 元素週期表（V2.1.0）：深色底＋玻璃片 ══════════
+   只有在「元素週期表」主題時，body 會加上 theme-tech：底色換成壓暗的同色系光暈與六角格線。
+   每個元素的類別色由 vocab-data.js 的 categories.color 帶入（--c，格式為 R,G,B）。 */
+body.theme-tech::before{background:
+  radial-gradient(60vw 55vh at 8% 0%,rgba(27,122,104,.50),transparent 70%),
+  radial-gradient(70vw 70vh at 60% 45%,rgba(74,30,163,.55),transparent 72%),
+  radial-gradient(55vw 50vh at 100% 100%,rgba(233,66,174,.38),transparent 70%),
+  #070a1c}
+body.theme-tech::after{content:"";position:fixed;inset:0;z-index:-1;opacity:.55;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66v34' fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1'/%3E%3C/svg%3E")}
+body.theme-tech .foot{text-shadow:none}
+.topic-notice{flex:1 1 260px;min-width:0;margin:0;padding:5px 12px;border:1px solid rgba(248,207,124,.55);border-radius:12px;background:rgba(224,163,61,.14);color:var(--amber-light);font-size:13.5px;font-weight:650;line-height:1.35}
+.ptable-view{--font-sym:"Bahnschrift","DIN Alternate","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  /* 一格的高度：讓族名列＋7 週期＋間隔＋鑭系錒系 2 列＋圖例剛好放進一個畫面 */
+  --cell-h:clamp(42px,calc((100vh - 308px) / 9.5),84px)}
+/* 矮螢幕時頂列與間距較緊（見上方 max-height:820px 的規則），可以多分一點高度給格子 */
+@media(max-height:820px) and (min-width:701px){ .ptable-view{--cell-h:clamp(42px,calc((100vh - 288px) / 9.5),84px)} }
+.pt-scroll{overflow-x:auto;padding:2px 2px 4px}
+.pt{display:grid;grid-template-columns:max-content repeat(18,minmax(0,1fr));grid-template-rows:20px repeat(7,var(--cell-h)) calc(var(--cell-h) * .3) repeat(2,var(--cell-h));gap:4px;min-width:1040px}
+.pt-el{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px 0 2px;min-width:0;line-height:1.06;color:#fff;border-radius:8px;
+  border:1px solid rgba(var(--c),.62);background:linear-gradient(150deg,rgba(255,255,255,.17),rgba(255,255,255,.05) 46%,rgba(var(--c),.11));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),inset 0 0 12px rgba(var(--c),.08),0 2px 8px rgba(0,0,0,.28);transition:transform .12s,box-shadow .12s,border-color .12s}
+.pt-el:hover{transform:translateY(-2px);border-color:rgb(var(--c));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 16px rgba(var(--c),.5),0 4px 12px rgba(0,0,0,.3);z-index:1}
+.pt-el .z{position:absolute;top:2px;left:4px;font-size:clamp(9px,calc(var(--cell-h) * .2),14px);font-variant-numeric:tabular-nums;color:rgba(255,255,255,.72)}
+.pt-el.z3 .z{font-size:clamp(8.5px,calc(var(--cell-h) * .18),13px);letter-spacing:-.4px;left:3px}
+.pt-el.z3 .sym{transform:translateX(4px)}
+.pt-el .sym{margin-top:calc(var(--cell-h) * .1);font-size:clamp(15px,calc(var(--cell-h) * .36),30px);font-weight:700;font-family:var(--font-sym);color:rgb(var(--c));text-shadow:0 0 10px rgba(var(--c),.45)}
+.pt-el .han{font-size:clamp(13px,calc(var(--cell-h) * .31),24px);font-weight:600;color:rgba(255,255,255,.95)}
+.pt-el.on{transform:none;border-color:#fff;background:linear-gradient(150deg,rgba(var(--c),.55),rgba(var(--c),.22));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 0 1px rgb(var(--c)),0 0 22px rgba(var(--c),.75);z-index:2}
+.pt-el.on .sym{color:#fff;text-shadow:0 0 12px rgba(255,255,255,.6)}
+.pt-period,.pt-group{color:var(--muted);font-weight:700;white-space:nowrap}
+.pt-period{display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:clamp(12px,calc(var(--cell-h) * .26),17px)}
+.pt-group{align-self:end;text-align:center;font-size:12.5px;line-height:18px;font-family:var(--font-sym);letter-spacing:.08em;color:rgba(255,255,255,.6)}
+.pt-series{display:flex;align-items:center;justify-content:center;text-align:center;border:1px dashed rgba(var(--c),.7);border-radius:8px;background:rgba(var(--c),.10);color:rgb(var(--c));font-weight:650;font-size:clamp(11px,calc(var(--cell-h) * .24),16px);line-height:1.2}
+.pt-series-label{display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:var(--muted);font-size:clamp(13px,calc(var(--cell-h) * .28),18px);font-weight:700}
+/* 選取的元素：毛玻璃面板，邊框與光暈跟著類別色；下緣留給族名 */
+.pt-detail{grid-column:4 / 14;grid-row:2 / 5;margin:0 6px 22px;border-radius:16px;display:flex;align-items:center;gap:clamp(14px,2.2vw,34px);padding:6px 24px;min-width:0;overflow:hidden;position:relative;
+  border:1px solid rgba(var(--c),.75);background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 55%,rgba(var(--c),.12));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 26px rgba(var(--c),.28),0 10px 30px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.pt-detail::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.14) 0%,transparent 28%);pointer-events:none}
+.pt-name{display:flex;flex-direction:column;align-items:center;flex:none}
+.pt-name .han{font-size:calc(var(--cell-h) * 1.25);font-weight:850;line-height:1.05;text-shadow:0 0 22px rgba(var(--c),.6)}
+.pt-name .en{font-size:clamp(13px,calc(var(--cell-h) * .3),22px);color:var(--muted);line-height:1.2;white-space:nowrap;font-family:var(--font-sym);letter-spacing:.03em}
+.pt-meta{display:flex;flex-direction:column;gap:3px;flex:none}
+.pt-meta .sym{font-size:calc(var(--cell-h) * .72);font-weight:700;font-family:var(--font-sym);line-height:1;color:rgb(var(--c));text-shadow:0 0 16px rgba(var(--c),.55)}
+.pt-meta .z,.pt-meta .cat{font-size:clamp(12px,calc(var(--cell-h) * .27),19px);white-space:nowrap}
+.pt-meta .z{color:var(--muted)}
+.pt-meta .cat{display:inline-flex;align-items:center;gap:6px}
+.pt-hak{display:flex;flex-direction:column;gap:5px;min-width:0;position:relative}
+.pt-reading{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.pt-dialect{font-size:clamp(12px,calc(var(--cell-h) * .26),18px);color:var(--muted);white-space:nowrap}
+.pt-reading .pinyin{font-size:clamp(22px,calc(var(--cell-h) * .62),50px);line-height:1.1;white-space:nowrap}
+.pt-aka{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;font-size:clamp(12px,calc(var(--cell-h) * .27),19px);color:var(--muted)}
+.pt-aka strong{color:var(--ink);font-weight:750}
+.pt-aka .pinyin{font-size:1.1em;line-height:1.2;white-space:nowrap}
+.pt-detail .audio-btn{padding:4px 14px;font-size:clamp(13px,calc(var(--cell-h) * .28),17px)}
+.pt-dot{display:inline-block;width:.9em;height:.9em;border-radius:50%;background:rgb(var(--c));box-shadow:0 0 8px rgba(var(--c),.8);flex:none}
+.pt-legend{display:flex;flex-wrap:wrap;align-items:center;gap:5px clamp(6px,.8vw,11px);margin-top:9px;font-size:clamp(11.5px,.98vw,13.5px)}
+.pt-legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:1px 10px 1px 8px;border-radius:999px;border:1px solid rgba(var(--c),.45);background:rgba(255,255,255,.06)}
+@media(max-width:700px){ .ptable-view{--cell-h:56px} }
+@media(prefers-reduced-motion:reduce){ .pt-el:hover{transform:none} }
+@media print{ .topic-notice{display:none!important} }
+
+body.theme-tech .main{max-width:none}   /* 週期表用滿整個寬度，寬螢幕上每格才不會變成直長形 */
 .phonology-overlay[hidden]{display:none!important}.phonology-overlay{position:fixed;inset:0;background:rgba(22,10,62,.80);z-index:3000;display:grid;place-items:center;padding:14px}.phonology-dialog{background:#faf8fe;color:#24124e;border-radius:22px;box-shadow:0 30px 85px #0e052388;width:min(1120px,98vw);max-height:96vh;overflow:auto;padding:22px 26px}.phonology-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dad3ec;padding-bottom:9px}.phonology-head h2{font-size:clamp(23px,2.6vw,34px);margin:3px 0}.phonology-close{border:0;background:#e7e1f4;border-radius:50%;font-size:28px;width:42px;height:42px;cursor:pointer}.phonology-actions,.phonology-dialects,.phonology-tone-buttons{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.phonology-actions button,.phonology-dialects button,.phonology-tone-buttons button,.phonology-all{border:1px solid #baadd7;background:white;color:#2f1a5f;padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:700;font-size:15px}.phonology-actions button.active,.phonology-dialects button.active,.phonology-tone-buttons button.active,.phonology-all.active{background:#2f0590;color:white;border-color:#2f0590}.phonology-wrap{overflow-x:auto}.phonology-grid{border-collapse:separate;border-spacing:3px;width:100%;min-width:750px;table-layout:fixed}.phonology-grid th{background:#e0d7f4;padding:10px 4px;color:#2d195c;font-size:13px}.phonology-grid td{border-radius:8px;background:#f1eef8;text-align:center;height:54px;padding:2px}.phonology-grid td:first-child{font-weight:750;background:#e4def1;min-width:105px;font-size:14px}.phonology-grid button{width:100%;height:49px;border:1px solid #977ed2;border-radius:8px;background:#fff;color:#280773;cursor:pointer;font-size:19px;font-weight:800;line-height:1.2}.phonology-grid button:hover,.phonology-grid button.active{background:#2e0392;color:#fff}.phonology-detail{background:#ebe4fa;border:1px solid #cec0ee;border-radius:13px;padding:16px 19px;margin:14px 0;line-height:1.7}.phonology-detail strong{font-size:25px}.phonology-note{font-size:13px;color:#5e5279;line-height:1.7}.phonology-tone-chart{width:100%;height:auto;max-height:440px;border:1px solid #dbd4ec;background:#fff;border-radius:12px}.phonology-tone-chart .tone-path{transition:opacity .22s;stroke-linecap:round;fill:none;stroke-width:4;stroke-dasharray:420;stroke-dashoffset:420;animation:drawTone .8s ease forwards}.phonology-tone-chart .tone-path.muted{stroke:#cec8dc!important;opacity:.2;animation:none;stroke-dashoffset:0}.phonology-tone-chart .tone-path:not(.muted){filter:drop-shadow(0 1px 2px #aaa3)}@keyframes drawTone{to{stroke-dashoffset:0}}.phonology-ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.phonology-ref-grid figure{margin:0;background:white;border:1px solid #dfd9ec;border-radius:12px;padding:9px}.phonology-ref-grid img{width:100%;height:auto;display:block}.phonology-ref-grid figcaption{font-size:13px;color:#4e3f6f;padding-top:8px}.phonology-headerline{font-weight:800;color:#311e5c;margin:15px 0 6px}.phonology-consonant-key{font-size:14px;color:#3d2b65}.phonology-tone-stat{font-size:20px;font-weight:750;color:#300b86;text-align:center;padding:5px 0 0}.phonology-toolbarline{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px}.phonology-toggle{display:flex;align-items:center;gap:6px;font-size:13px}.phonology-toggle input{width:17px;height:17px}.phonology-small-table{border-collapse:collapse;width:100%;margin:10px 0}.phonology-small-table th,.phonology-small-table td{border:1px solid #c4b9dc;padding:9px 7px;text-align:center}.phonology-small-table th{background:#e0d7f4}.phonology-ref-note{color:#5b4e79;font-size:13px}.phonology-hidden{display:none!important}
 @media(max-width:700px){.phonology-dialog{padding:12px}.phonology-ref-grid{grid-template-columns:1fr}.phonology-grid{min-width:690px}}
 .phonology-dialects[hidden]{display:none!important}

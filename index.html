@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1b5e51">
   <meta name="description" content="生活中的科學　客語詞彙篇：擂茶、傳統醫學與養生、化學實驗的客語詞彙互動學習網站。海陸腔與四縣腔、逐詞讀音、調值與調型切換、猜詞揭曉、詞彙總表與語音工具。">
-  <title>生活中的科學　客語詞彙篇｜V1.6.0</title>
+  <title>生活中的科學　客語詞彙篇｜V2.1.0</title>
   <link rel="stylesheet" href="styles.css">
   <script src="vocab-data.js" defer></script>
   <script src="audio-manifest.js" defer></script>
@@ -21,7 +21,7 @@
         <span class="brand-mark" aria-hidden="true">客</span>
         <div class="brand-text">
           <strong id="siteTitle">生活中的科學　客語詞彙篇</strong>
-          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V1.6.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
+          <span><span id="siteSub">擂茶詞彙</span>｜<span id="siteVersion">V2.1.0</span>｜<a href="versions.html" target="_blank" rel="noopener">版本更新紀錄 ↗</a></span>
         </div>
       </div>
       <div class="top-actions">
@@ -33,7 +33,7 @@
           <button type="button" data-tone="value" aria-pressed="true" class="active">調值</button>
           <button type="button" data-tone="shape" aria-pressed="false">調型</button>
         </div>
-        <div class="seg" role="group" aria-label="檢視方式">
+        <div class="seg" id="viewSeg" role="group" aria-label="檢視方式">
           <button type="button" data-view="card" aria-pressed="true" class="active">詞彙卡</button>
           <button type="button" data-view="list" aria-pressed="false">詞彙總表</button>
         </div>
@@ -49,6 +49,7 @@
       <nav class="topic-tabs" id="topicTabs" aria-label="主題"></nav>
       <nav class="group-tabs" id="groupTabs" aria-label="詞彙分類"></nav>
       <button type="button" id="extraBtn" class="extra-button" aria-pressed="false" hidden></button>
+      <p id="topicNotice" class="topic-notice" role="status" hidden></p>
     </div>
 
     <main class="main" id="main">
@@ -90,6 +91,11 @@
         </div>
       </section>
 
+      <section id="ptableView" class="ptable-view" aria-label="元素週期表" hidden>
+        <div class="pt-scroll"><div class="pt" id="pt"></div></div>
+        <div class="pt-legend" id="ptLegend" aria-label="元素類別"></div>
+      </section>
+
       <section id="extraView" class="extra-view" aria-labelledby="extraTitle" hidden>
         <h2 id="extraTitle"></h2>
         <div id="extraNotice" class="extra-notice"></div>
@@ -99,7 +105,7 @@
 
     <footer class="foot">
       <span id="footInfo"></span>
-      <span class="foot-keys">←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕</span>
+      <span class="foot-keys" id="footKeys">←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕</span>
     </footer>
   </div>
 

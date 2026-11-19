@@ -3,6 +3,7 @@
    ─ 修改詞彙：vocab-data.js
    ─ 修改外觀：styles.css 最上方的變數
    ─ 音檔：assets/audio/，清單在 audio-manifest.js
+   ─ 元素週期表：資料在 vocab-data.js 的 elem 主題，畫面由本檔的 renderPtable 產生
    ─ 語音工具：phonology-tools.js、phonology-rimes-data.js（獨立運作）
    ─ 每次改版請更新 vocab-data.js 的 version，並在 CHANGELOG.md、versions.html 各加一筆。
 */
@@ -32,10 +33,15 @@
   const wantedTopic = new URLSearchParams(location.search).get('topic');
   // 「所有詞彙」：把各主題的詞彙接在一起看，不分主題、也不分類。網址用 ?topic=all。
   for (const t of TOPICS) for (const w of t.words) { w._topic = t.id; w._topicLabel = t.label; w._uid = `${t.id}/${w.id}`; }
-  const ALL_TOPIC = { id: 'all', label: '所有詞彙', groups: [], words: TOPICS.flatMap(t => t.words) };
-  const TOPIC_TABS = [...TOPICS, ALL_TOPIC];
-  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1 };
+  // 「元素週期表」（type: "periodic"）以週期表呈現，不做成詞彙卡，也不併入「所有詞彙」。
+  const isPeriodic = t => Boolean(t) && t.type === 'periodic';
+  const ALL_TOPIC = { id: 'all', label: '所有詞彙', groups: [], words: TOPICS.filter(t => !isPeriodic(t)).flatMap(t => t.words) };
+  const TOPIC_TABS = [ALL_TOPIC, ...TOPICS];
+  // 主題列與標題下方顯示的名稱：詞彙主題加上「詞彙」兩字。
+  const tabLabel = t => t.id === 'all' || isPeriodic(t) ? t.label : `${t.label}詞彙`;
+  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1, el: 1 };
   const topic = () => TOPIC_TABS.find(t => t.id === state.topic) || TOPICS[0];
+  if (isPeriodic(topic())) state.view = 'ptable';
 
   // 單一檔預覽版會把圖檔內嵌在 window.__ASSET；正式網站直接用路徑。
   const asset = path => (window.__ASSET && window.__ASSET[path]) || path;
@@ -107,6 +113,12 @@
     sync('dialect', state.dialect);
     sync('tone', state.toneMode);
     sync('view', state.view);
+    // 元素週期表：換成深色玻璃風格的底，並收起用不到的按鈕（檢視方式、華語揭曉、字級），免得按了沒有反應。
+    const periodic = isPeriodic(topic());
+    document.body.classList.toggle('theme-tech', periodic);
+    $('viewSeg').hidden = periodic; $('meaningToggle').hidden = periodic; $('fontToggle').hidden = periodic;
+    const notice = $('topicNotice'); notice.textContent = topic().notice || ''; notice.hidden = !topic().notice;
+    $('footKeys').textContent = periodic ? '←／→ 換元素　P 播放　F 全螢幕' : '←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕';
     $('fontToggle').textContent = state.fontUp > 1 ? '字級－' : '字級＋';
     const meaningToggle = $('meaningToggle');
     meaningToggle.textContent = state.showAll ? '華語：全部顯示' : '華語：逐詞揭曉';
@@ -115,9 +127,9 @@
     $('app').style.setProperty('--fontup', state.fontUp);
     $('topicTabs').innerHTML = TOPIC_TABS.map(t => {
       const on = t.id === state.topic;
-      return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(t.label)}<small>${t.words.length}</small></button>`;
+      return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(tabLabel(t))}<small>${t.words.length}</small></button>`;
     }).join('');
-    $('siteSub').textContent = state.topic === 'all' ? topic().label : `${topic().label}詞彙`;
+    $('siteSub').textContent = tabLabel(topic());
     const extras = topic().extras, extraBtn = $('extraBtn');
     if (!extras && state.view === 'extra') state.view = 'card';
     extraBtn.hidden = !extras;
@@ -125,7 +137,7 @@
     extraBtn.classList.toggle('active', state.view === 'extra');
     extraBtn.setAttribute('aria-pressed', String(state.view === 'extra'));
     const groups = topic().groups || [];
-    $('groupTabs').hidden = !groups.length || state.view === 'extra';   // 主題沒有分類、或正在看補充區時，不顯示分類頁籤
+    $('groupTabs').hidden = !groups.length || state.view === 'extra' || periodic;   // 主題沒有分類、或正在看補充區時，不顯示分類頁籤
     $('groupTabs').innerHTML = [{ id: 'all' }, ...groups].map(g => {
       const on = g.id === state.group;
       return `<button type="button" data-group="${esc(g.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(groupLabel(g.id))}<small>${wordsIn(g.id).length}</small></button>`;
@@ -200,7 +212,62 @@
     $('cardView').hidden = state.view !== 'card';
     $('listView').hidden = state.view !== 'list';
     $('extraView').hidden = state.view !== 'extra';
-    if (state.view === 'card') renderCard(); else if (state.view === 'list') renderList(); else renderExtra();
+    $('ptableView').hidden = state.view !== 'ptable';
+    if (state.view === 'card') renderCard(); else if (state.view === 'list') renderList(); else if (state.view === 'ptable') renderPtable(); else renderExtra();
+  }
+
+  /* ── 元素週期表 ──
+     位置由原子序算出：第 1 欄放週期，元素在第（族＋1）欄；第 1 列放族名，元素在第（週期＋1）列；
+     鑭系、錒系拉到下方兩列。點選的元素顯示在上方空白處（週期 1–3、第 3–12 族的位置）。 */
+  const PT_GROUPS = ['I A', 'II A', 'III B', 'IV B', 'V B', 'VI B', 'VII B', 'VIII B', 'VIII B', 'VIII B', 'I B', 'II B', 'III A', 'IV A', 'V A', 'VI A', 'VII A', 'VIII A'];
+  function ptPos(z) {
+    if (z === 1) return [1, 1]; if (z === 2) return [18, 1];
+    if (z <= 4) return [z - 2, 2]; if (z <= 10) return [z + 8, 2];
+    if (z <= 12) return [z - 10, 3]; if (z <= 18) return [z, 3];
+    if (z <= 36) return [z - 18, 4]; if (z <= 54) return [z - 36, 5];
+    if (z <= 56) return [z - 54, 6]; if (z <= 71) return [z - 53, 9]; if (z <= 86) return [z - 68, 6];
+    if (z <= 88) return [z - 86, 7]; if (z <= 103) return [z - 85, 10]; return [z - 100, 7];
+  }
+  const ptCats = () => Object.fromEntries((topic().categories || []).map(c => [c.id, c]));
+  const ptColor = (cats, id) => (cats[id] && /^\d{1,3},\d{1,3},\d{1,3}$/.test(cats[id].color)) ? cats[id].color : '200,205,220';
+  const ptElement = z => topic().words.find(w => w.id === z);
+  function renderPtable() {
+    const cats = ptCats(), at = (g, p) => `grid-column:${g + 1};grid-row:${p + 1}`;
+    if (!ptElement(state.el)) state.el = topic().words[0].id;
+    let html = '<div class="pt-detail" id="ptDetail" aria-live="polite"></div>';
+    for (let p = 1; p <= 7; p++) html += `<div class="pt-period" style="grid-column:1;grid-row:${p + 1}">週期${p}</div>`;
+    PT_GROUPS.forEach((g, i) => { const col = i + 1, above = col === 1 || col === 18 ? 0 : col === 2 || col >= 13 ? 1 : 3;   // 族名放在該欄第一個元素的正上方
+      html += `<div class="pt-group" style="grid-column:${col + 1};grid-row:${above + 1}">${g}</div>`; });
+    for (const w of topic().words) {
+      const [g, p] = ptPos(w.id), entry = entryOf(w);
+      html += `<button type="button" class="pt-el${w.id > 99 ? ' z3' : ''}" data-el="${w.id}" style="--c:${ptColor(cats, w.cat)};${at(g, p)}" aria-label="${w.id} ${esc(w.sym)} ${esc(entry ? entry.han : '')}"><span class="z">${w.id}</span><span class="sym">${esc(w.sym)}</span><span class="han" lang="hak">${esc(entry ? entry.han : '')}</span></button>`;
+    }
+    html += `<div class="pt-series" style="--c:${ptColor(cats, 'lanth')};${at(3, 6)}">57–71<br>鑭系</div><div class="pt-series" style="--c:${ptColor(cats, 'act')};${at(3, 7)}">89–103<br>錒系</div>`
+      + '<div class="pt-series-label" style="grid-column:1 / 5;grid-row:10">鑭系</div><div class="pt-series-label" style="grid-column:1 / 5;grid-row:11">錒系</div>';
+    $('pt').innerHTML = html;
+    $('ptLegend').innerHTML = (topic().categories || []).map(c => `<span style="--c:${ptColor(cats, c.id)}"><i class="pt-dot"></i>${esc(c.label)}</span>`).join('');
+    renderElement();
+  }
+  function renderElement() {
+    const w = ptElement(state.el); if (!w) return;
+    const cats = ptCats(), entry = entryOf(w), detail = $('ptDetail');
+    $('pt').querySelectorAll('.pt-el.on').forEach(b => b.classList.remove('on'));
+    $('pt').querySelector(`.pt-el[data-el="${w.id}"]`)?.classList.add('on');
+    const main = audioKey(w, state.dialect, false), akaKey = audioKey(w, state.dialect, true);
+    const play = main ? `<button type="button" class="audio-btn" data-audio-key="${esc(main)}" title="播放讀音（P）"><span aria-hidden="true">▶</span> 播放</button>` : '';
+    const aka = w.aka ? `<div class="pt-aka">俗稱<strong lang="hak">${esc(w.aka.han)}</strong><span class="pinyin" lang="hak">${esc(formatPinyin(w.aka[state.dialect], state.dialect))}</span>`
+      + (akaKey ? `<button type="button" class="audio-btn" data-audio-key="${esc(akaKey)}" title="播放「${esc(w.aka.han)}」"><span aria-hidden="true">▶</span> ${esc(w.aka.han)}</button>` : '') + '</div>' : '';
+    detail.style.setProperty('--c', ptColor(cats, w.cat));
+    detail.innerHTML = `<div class="pt-name"><span class="han" lang="hak">${esc(entry ? entry.han : '')}</span><span class="en">${esc(w.en || '')}</span></div>`
+      + `<div class="pt-meta"><span class="sym">${esc(w.sym)}</span><span class="z">原子序 ${w.id}${w.state ? '・' + esc(w.state) : ''}</span><span class="cat"><i class="pt-dot"></i>${esc(cats[w.cat] ? cats[w.cat].label : '')}</span></div>`
+      + `<div class="pt-hak"><div class="pt-reading"><span class="pt-dialect">${DIALECTS[state.dialect]}</span><span class="pinyin" lang="hak">${esc(entry ? formatPinyin(entry.pinyin, state.dialect) : '')}</span>${play}</div>${aka}</div>`;
+  }
+  function selectElement(z, moveFocus) {
+    const ids = topic().words.map(w => w.id); if (!ids.length) return;
+    state.el = ids.includes(z) ? z : (z < ids[0] ? ids[ids.length - 1] : ids[0]);   // 超出範圍就繞回另一端
+    stopAudio(); renderElement();
+    // 用方向鍵換元素時，焦點跟著移到新的那一格，免得空白鍵又按回原本點過的格子。
+    if (moveFocus) $('pt').querySelector('.pt-el.on')?.focus({ preventScroll: true });
   }
 
   /* ── 補充區（參考圖）：縮圖用靜態圖，點開才載入動態圖。 ── */
@@ -274,7 +341,12 @@
     if (t.dataset.extraOpen) { showViewer(Number(t.dataset.extraOpen)); document.querySelector('[data-viewer="close"]').focus(); return; }
     if (t.id === 'extraBtn') { state.view = state.view === 'extra' ? 'card' : 'extra'; render(); return; }
     if (t.dataset.audioKey) { playAudio(t.dataset.audioKey, t); refocus(); return; }
-    if (t.dataset.topic) { state.topic = t.dataset.topic; state.group = 'all'; state.idx = 0; state.shown = false; render(); refocus(); return; }
+    if (t.dataset.el) { selectElement(Number(t.dataset.el)); return; }
+    if (t.dataset.topic) {
+      state.topic = t.dataset.topic; state.group = 'all'; state.idx = 0; state.shown = false;
+      state.view = isPeriodic(topic()) ? 'ptable' : (state.view === 'ptable' ? 'card' : state.view);
+      render(); refocus(); return;
+    }
     if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }
     if (t.dataset.tone) { state.toneMode = t.dataset.tone; render(); refocus(); return; }
     if (t.dataset.view) { state.view = t.dataset.view; render(); refocus(); return; }
@@ -309,6 +381,12 @@
     if (target.matches?.('input,textarea,select') || target.isContentEditable) return;
     if (e.key.toLowerCase() === 'f') { toggleFullscreen(); return; }
     if (e.key.toLowerCase() === 'p' && state.view === 'card') { const b = document.querySelector('#cardAudio .audio-btn'); if (b) playAudio(b.dataset.audioKey, b); return; }
+    if (state.view === 'ptable') {
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); selectElement(state.el - 1, true); }
+      else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); selectElement(state.el + 1, true); }
+      else if (e.key.toLowerCase() === 'p') { const b = document.querySelector('#ptDetail .audio-btn'); if (b) playAudio(b.dataset.audioKey, b); }
+      return;
+    }
     if (state.view !== 'card') return;
     if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
     else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
