@@ -35,13 +35,17 @@
   for (const t of TOPICS) for (const w of t.words) { w._topic = t.id; w._topicLabel = t.label; w._uid = `${t.id}/${w.id}`; }
   // 「元素週期表」（type: "periodic"）以週期表呈現，不做成詞彙卡，也不併入「所有詞彙」。
   const isPeriodic = t => Boolean(t) && t.type === 'periodic';
-  const ALL_TOPIC = { id: 'all', label: '所有詞彙', groups: [], words: TOPICS.filter(t => !isPeriodic(t)).flatMap(t => t.words) };
+  // 「科學實驗語句練習」（type: "reading"）：逐句練習，每句一個音檔，另有「聆聽全文」。同樣不併入「所有詞彙」。
+  const isReading = t => Boolean(t) && t.type === 'reading';
+  const ALL_TOPIC = { id: 'all', label: '所有詞彙', groups: [], words: TOPICS.filter(t => !t.type).flatMap(t => t.words) };
   const TOPIC_TABS = [ALL_TOPIC, ...TOPICS];
   // 主題列與標題下方顯示的名稱：詞彙主題加上「詞彙」兩字。
-  const tabLabel = t => t.id === 'all' || isPeriodic(t) ? t.label : `${t.label}詞彙`;
-  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1, el: 1, ptCat: '' };
+  const tabLabel = t => t.id === 'all' || t.type ? t.label : `${t.label}詞彙`;
+  const tabCount = t => isReading(t) ? (t.passages || []).length : t.words.length;
+  const state = { topic: TOPIC_TABS.some(t => t.id === wantedTopic) ? wantedTopic : TOPICS[0].id, dialect: 'hailu', toneMode: 'value', view: 'card', group: 'all', idx: 0, shown: false, showAll: false, fontUp: 1, el: 1, ptCat: '', passage: 0 };
   const topic = () => TOPIC_TABS.find(t => t.id === state.topic) || TOPICS[0];
-  if (isPeriodic(topic())) state.view = 'ptable';
+  const specialView = t => isPeriodic(t) ? 'ptable' : isReading(t) ? 'reading' : '';
+  if (specialView(topic())) state.view = specialView(topic());
 
   // 單一檔預覽版會把圖檔內嵌在 window.__ASSET；正式網站直接用路徑。
   const asset = path => (window.__ASSET && window.__ASSET[path]) || path;
@@ -76,7 +80,7 @@
   const audioButtons = (word, dialect) => {
     const main = audioKey(word, dialect, false), alt = audioKey(word, dialect, true);
     return (main ? `<button type="button" class="audio-btn" data-audio-key="${esc(main)}" title="播放讀音（P）"><span aria-hidden="true">▶</span> 播放</button>` : '')
-      + (alt ? `<button type="button" class="audio-btn" data-audio-key="${esc(alt)}" title="播放又音"><span aria-hidden="true">▶</span> 又音</button>` : '');
+      + (alt ? `<button type="button" class="audio-btn" data-audio-key="${esc(alt)}" title="播放${word.aka ? '「' + esc(word.aka.han) + '」' : '又音'}"><span aria-hidden="true">▶</span> ${word.aka ? esc(word.aka.han) : '又音'}</button>` : '');
   };
   let player = null, playingButton = null;
   function stopAudio() {
@@ -114,11 +118,11 @@
     sync('tone', state.toneMode);
     sync('view', state.view);
     // 元素週期表：換成深色玻璃風格的底，並收起用不到的按鈕（檢視方式、華語揭曉、字級），免得按了沒有反應。
-    const periodic = isPeriodic(topic());
+    const periodic = isPeriodic(topic()), reading = isReading(topic()), special = periodic || reading;
     document.body.classList.toggle('theme-tech', periodic);
-    $('viewSeg').hidden = periodic; $('meaningToggle').hidden = periodic; $('fontToggle').hidden = periodic;
+    $('viewSeg').hidden = special; $('meaningToggle').hidden = special; $('fontToggle').hidden = special;
     const notice = $('topicNotice'); notice.textContent = topic().notice || ''; notice.hidden = !topic().notice;
-    $('footKeys').textContent = periodic ? '←／→ 換元素　P 播放　F 全螢幕' : '←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕';
+    $('footKeys').textContent = periodic ? '←／→ 換元素　P 播放　F 全螢幕' : reading ? 'F 全螢幕' : '←／→ 換詞　空白鍵 揭曉　P 播放　F 全螢幕';
     $('fontToggle').textContent = state.fontUp > 1 ? '字級－' : '字級＋';
     const meaningToggle = $('meaningToggle');
     meaningToggle.textContent = state.showAll ? '華語：全部顯示' : '華語：逐詞揭曉';
@@ -127,7 +131,7 @@
     $('app').style.setProperty('--fontup', state.fontUp);
     $('topicTabs').innerHTML = TOPIC_TABS.map(t => {
       const on = t.id === state.topic;
-      return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(tabLabel(t))}<small>${t.words.length}</small></button>`;
+      return `<button type="button" data-topic="${esc(t.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(tabLabel(t))}<small>${tabCount(t)}</small></button>`;
     }).join('');
     $('siteSub').textContent = tabLabel(topic());
     const extras = topic().extras, extraBtn = $('extraBtn');
@@ -137,7 +141,12 @@
     extraBtn.classList.toggle('active', state.view === 'extra');
     extraBtn.setAttribute('aria-pressed', String(state.view === 'extra'));
     const groups = topic().groups || [];
-    $('groupTabs').hidden = !groups.length || state.view === 'extra' || periodic;   // 主題沒有分類、或正在看補充區時，不顯示分類頁籤
+    $('groupTabs').hidden = !groups.length || state.view === 'extra' || special;
+    // 語句練習：分類那一排換成各篇的頁籤
+    const passages = reading ? (topic().passages || []) : [];
+    if (state.passage >= passages.length) state.passage = 0;
+    $('passageTabs').hidden = !reading;
+    $('passageTabs').innerHTML = passages.map((p, i) => `<button type="button" data-passage="${i}" class="${i === state.passage ? 'active' : ''}" aria-pressed="${i === state.passage}">${esc(p.title)}</button>`).join('');   // 主題沒有分類、或正在看補充區時，不顯示分類頁籤
     $('groupTabs').innerHTML = [{ id: 'all' }, ...groups].map(g => {
       const on = g.id === state.group;
       return `<button type="button" data-group="${esc(g.id)}" class="${on ? 'active' : ''}" aria-pressed="${on}">${esc(groupLabel(g.id))}<small>${wordsIn(g.id).length}</small></button>`;
@@ -160,8 +169,12 @@
     swatch.innerHTML = swatchHTML(word, 'swatch'); swatch.hidden = !colorCount; swatch.classList.toggle('multi', colorCount > 1);
     $('cardPinyin').textContent = entry ? formatPinyin(entry.pinyin, state.dialect) : '';
     const alt = $('cardAlt');
-    alt.hidden = !(entry && entry.alt);
-    alt.textContent = entry && entry.alt ? `又音 ${formatPinyin(entry.alt, state.dialect)}` : '';
+    // 又音（同一個詞的另一個讀法）與又稱（另一個說法，例如漏斗又稱酒漏仔）都放在這一行
+    const altParts = [];
+    if (entry && entry.alt) altParts.push(`又音 ${formatPinyin(entry.alt, state.dialect)}`);
+    if (word.aka && word.aka[state.dialect]) altParts.push(`又稱 ${word.aka.han} ${formatPinyin(word.aka[state.dialect], state.dialect)}`);
+    alt.hidden = !altParts.length;
+    alt.textContent = altParts.join('　');
     // 播放鈕只在換了詞或腔調時重畫，揭曉答案時不打斷正在播放的音檔。
     const audioBox = $('cardAudio'), audioId = `${state.dialect}/${word._uid}`;
     if (audioBox.dataset.for !== audioId) {
@@ -199,7 +212,8 @@
     $('listBody').innerHTML = currentWords().map((word, index) => {
       const entry = entryOf(word);
       const pinyin = entry ? esc(formatPinyin(entry.pinyin, state.dialect)) : '';
-      const alt = entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '';
+      const alt = (entry && entry.alt ? `<small>又音 ${esc(formatPinyin(entry.alt, state.dialect))}</small>` : '')
+        + (word.aka && word.aka[state.dialect] ? `<small>又稱 ${esc(word.aka.han)} ${esc(formatPinyin(word.aka[state.dialect], state.dialect))}</small>` : '');
       return `<tr><td>${state.topic === 'all' ? index + 1 : esc(word.id)}</td><td class="col-topic">${esc(word._topicLabel)}</td><td class="col-pos">${esc(word.pos || '')}</td>`
         + `<td><button type="button" class="list-word" data-open="${esc(word._uid)}" lang="hak">${esc(entry ? entry.han : '—')}</button><span class="dots" aria-hidden="true">${swatchHTML(word, 'dot')}</span></td>`
         + `<td class="pinyin-cell" lang="hak">${pinyin}${alt}</td><td class="audio-cell col-audio">${entry ? audioButtons(word, state.dialect) : ''}</td><td>${esc(word.meaning)}</td><td>${esc(word.note || '')}</td></tr>`;
@@ -213,7 +227,27 @@
     $('listView').hidden = state.view !== 'list';
     $('extraView').hidden = state.view !== 'extra';
     $('ptableView').hidden = state.view !== 'ptable';
-    if (state.view === 'card') renderCard(); else if (state.view === 'list') renderList(); else if (state.view === 'ptable') renderPtable(); else renderExtra();
+    $('readingView').hidden = state.view !== 'reading';
+    if (state.view === 'card') renderCard(); else if (state.view === 'list') renderList(); else if (state.view === 'ptable') renderPtable(); else if (state.view === 'reading') renderReading(); else renderExtra();
+  }
+
+  /* ── 科學實驗語句練習：每句一列（漢字、拼音、播放鈕），上方是「聆聽全文」。
+     音檔檔名：〔篇〕-〔句，兩位數〕，全文是〔篇〕-full；清單在 audio-manifest.js 的 read 主題。 ── */
+  const readKey = (pid, name, dialect) => {
+    const set = AUDIO && AUDIO.topics && AUDIO.topics[topic().id], key = `${pid}-${name}`;
+    return set && (set[dialect] || []).includes(key) ? `${set.dir ? set.dir + '/' : ''}${dialect}/${key}` : '';
+  };
+  function renderReading() {
+    const p = (topic().passages || [])[state.passage]; if (!p) return;
+    $('readingTitle').textContent = p.title;
+    $('readingDialect').textContent = DIALECTS[state.dialect];
+    const full = readKey(p.id, 'full', state.dialect);
+    $('readingFull').innerHTML = full ? `<button type="button" class="audio-btn reading-full" data-audio-key="${esc(full)}" title="從頭到尾播放整篇"><span aria-hidden="true">▶</span> 聆聽全文</button>` : '';
+    $('readingLines').innerHTML = p.lines.map(line => {
+      const entry = line[state.dialect], key = readKey(p.id, String(line.id).padStart(2, '0'), state.dialect);
+      return `<li><span class="reading-n">${esc(line.id)}</span><div class="reading-text"><span class="reading-han" lang="hak">${esc(entry ? entry.han : '')}</span><span class="pinyin" lang="hak">${esc(entry ? formatPinyin(entry.pinyin, state.dialect) : '')}</span></div>`
+        + (key ? `<button type="button" class="audio-btn" data-audio-key="${esc(key)}" title="播放第${esc(line.id)}句"><span aria-hidden="true">▶</span> 播放</button>` : '') + '</li>';
+    }).join('');
   }
 
   /* ── 元素週期表 ──
@@ -351,10 +385,11 @@
     if (t.id === 'extraBtn') { state.view = state.view === 'extra' ? 'card' : 'extra'; render(); return; }
     if (t.dataset.audioKey) { playAudio(t.dataset.audioKey, t); refocus(); return; }
     if (t.dataset.el) { selectElement(Number(t.dataset.el)); return; }
+    if (t.dataset.passage) { state.passage = Number(t.dataset.passage); render(); return; }
     if (t.dataset.ptCat) { state.ptCat = state.ptCat === t.dataset.ptCat ? '' : t.dataset.ptCat; renderPtFocus(); return; }
     if (t.dataset.topic) {
       state.topic = t.dataset.topic; state.group = 'all'; state.idx = 0; state.shown = false;
-      state.view = isPeriodic(topic()) ? 'ptable' : (state.view === 'ptable' ? 'card' : state.view);
+      state.view = specialView(topic()) || (state.view === 'ptable' || state.view === 'reading' ? 'card' : state.view);
       render(); refocus(); return;
     }
     if (t.dataset.dialect) { state.dialect = t.dataset.dialect; state.shown = false; render(); refocus(); return; }

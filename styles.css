@@ -221,15 +221,20 @@ a{color:inherit}
    更窄時省略主題頁籤上的詞數。 */
 @media(max-width:1600px) and (min-width:701px){
   .filter-row{gap:8px 10px}
-  .topic-tabs button{padding:7px 10px;font-size:15px}
+  .topic-tabs button{padding:7px 9px;font-size:15px}
   .topic-tabs button small{margin-left:4px;font-size:12px}
   .group-tabs{gap:6px}
-  .group-tabs button{padding:7px 11px;font-size:15px}
+  .group-tabs button{padding:7px 10px;font-size:15px}
   .group-tabs button small{margin-left:4px;font-size:12px}
   .extra-button{padding:7px 12px;font-size:15px}
 }
-@media(max-width:1300px) and (min-width:701px){
+/* 主題列有六個頁籤（V2.3.0 加了語句練習）：一般筆電寬度再收緊，並省略主題頁籤上的數字 */
+@media(max-width:1450px) and (min-width:701px){
+  .topic-tabs button{padding:7px 8px;font-size:14.5px}
   .topic-tabs button small{display:none}
+  .group-tabs{gap:5px}
+  .group-tabs button{padding:7px 9px;font-size:14.5px}
+  .extra-button{padding:7px 10px;font-size:14.5px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{
@@ -246,6 +251,21 @@ a{color:inherit}
 /* V1.1.1：韻母配字表以教育部拼音為主，方括號內的IPA用小字附註。 */
 .phon-rime-initial small,.phon-rime-table th small{display:block;margin-top:1px;font-size:11px;font-weight:400;color:#6a5c8f;white-space:nowrap}
 .phon-rime-ipa{margin-left:8px;font-size:14px;color:#6a5c8f}
+
+/* ══════════ 科學實驗語句練習：每句一列，字級跟著螢幕高度走，8 句左右可以一個畫面看完 ══════════ */
+.reading-view{--rl:clamp(52px,calc((100vh - 292px) / 8),96px);max-width:1180px;margin:0 auto;width:100%}
+.reading-head{display:flex;align-items:center;gap:14px;margin:0 0 8px;flex-wrap:wrap}
+.reading-head h2{margin:0;font-size:clamp(20px,2.2vw,28px);letter-spacing:.04em}
+.reading-dialect{padding:3px 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;color:var(--muted)}
+.reading-full-box{margin-left:auto}
+.reading-full{padding:8px 22px!important;font-size:17px!important;background:var(--amber)!important;border-color:var(--amber)!important;color:var(--on-amber)!important;font-weight:800!important}
+.reading-lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.reading-lines li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 16px;min-height:calc(var(--rl) - 5px);padding:3px 16px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:var(--panel)}
+.reading-n{width:1.9em;height:1.9em;display:grid;place-items:center;border-radius:50%;background:var(--panel-inset);color:var(--muted);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.reading-text{display:flex;flex-direction:column;min-width:0}
+.reading-han{font-size:calc(var(--rl) * .42);font-weight:750;line-height:1.2;letter-spacing:.06em}
+.reading-text .pinyin{font-size:calc(var(--rl) * .29);line-height:1.25;overflow-wrap:anywhere}
+@media(max-width:700px){ .reading-view{--rl:74px} .reading-lines li{grid-template-columns:auto 1fr;padding:8px 12px} .reading-lines li .audio-btn{grid-column:2;justify-self:start} .reading-full-box{margin-left:0;width:100%} }
 
 /* ══════════ 元素週期表（V2.1.0）：深色底＋玻璃片 ══════════
    只有在「元素週期表」主題時，body 會加上 theme-tech：底色換成壓暗的同色系光暈與六角格線。

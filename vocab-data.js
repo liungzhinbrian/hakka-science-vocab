@@ -14,6 +14,9 @@
        image    圖片（選填）{ src: "assets/images/檔名.jpg", credit: "來源", url: "來源網址（選填）" }
    ─ 主題可以另外帶一個補充區（extras），放參考圖；目前只有「傳統醫學與養生」有。
    ─ 新增主題：在 topics 加一段 { id: "英文代號", label: "顯示名稱", groups: [], words: [ … ] }。
+   ─ 「科學實驗語句練習」（type: "reading"）：passages 是各篇，lines 是各句；每句有 hailu／sixian 的漢字與調值拼音。
+       音檔檔名是「篇-句」（例如 1-03），全文是「篇-full」，放在 assets/audio/read/〔腔調〕/。
+   ─ 詞彙可加 aka（又稱）：{ han, hailu, sixian }，卡片會多一行「又稱」；它的音檔用「編號-alt」。
    ─ 「元素週期表」是特別的主題（type: "periodic"）：以週期表呈現，不做成詞彙卡，也不併入「所有詞彙」。
        每個元素的欄位：id 原子序、sym 符號、en 英文名、cat 類別（對應 categories 的 id）、state 常溫常壓下的狀態、
        hailu／sixian 兩腔的漢字與調值拼音、zhuyin 華語注音符號、aka 俗稱（選填，例如汞俗稱水銀）。
@@ -27,7 +30,7 @@ window.VOCAB_DATA = {
   term: "115 學年度第一學期　客語結合十二年國教校訂課程",
   teachers: "授課教師：葉鈞喬老師、黃勤展老師",
   credit: "網頁編修／客華校訂／語音資料：曾櫳震老師",
-  version: "V2.2.0",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
+  version: "V2.3.0",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
   legend: [
     "客語漢字：優先使用教育部客語推薦用字表之漢字，若無則從俗暫用。",
     "客語拼音：以教育部辭典為主。資料以調值記錄，網站可切換顯示調值或調型符號。",
@@ -491,7 +494,7 @@ window.VOCAB_DATA = {
         meaning: "著涼、感冒" }
       ]
     },
-    /* ════════ 主題三：化學實驗（22 詞）════════ */
+    /* ════════ 主題三：化學實驗（31 詞）════════ */
     {
       id: "chem",
       label: "化學實驗",
@@ -604,7 +607,72 @@ window.VOCAB_DATA = {
       { id: 22, group: "形容詞", pos: "形容詞",
         hailu: { han: "無色", pinyin: "mo55 sed5" },
         sixian: { han: "無色", pinyin: "mo11 sed2" },
-        meaning: "無色" }
+        meaning: "無色" },
+      { id: 23, group: "名詞", pos: "名詞（器物）",
+        hailu: { han: "量筒", pinyin: "liong55 tung24" },
+        sixian: { han: "量筒", pinyin: "liong11 tung31" },
+        meaning: "量筒" },
+      { id: 24, group: "動詞", pos: "動詞",
+        hailu: { han: "分析", pinyin: "fun53 sid5" },
+        sixian: { han: "分析", pinyin: "fun24 xid2" },
+        meaning: "分析" },
+      { id: 25, group: "名詞", pos: "名詞（器物）",
+        hailu: { han: "漏斗", pinyin: "leu33 deu24" },
+        sixian: { han: "漏斗", pinyin: "leu55 deu31" },
+        meaning: "漏斗",
+        aka: { han: "酒漏仔", hailu: "ziu24 leu33 er55", sixian: "jiu31 leu55 e31" } },
+      { id: 26, group: "動詞", pos: "動詞",
+        hailu: { han: "吸過來", pinyin: "kib2 go11 loi55" },
+        sixian: { han: "吸過來", pinyin: "kib5 go55 loi11" },
+        meaning: "吸過來" },
+      { id: 27, group: "名詞", pos: "名詞",
+        hailu: { han: "抗氧化力", pinyin: "kong11 rhong53 fa11 lid2" },
+        sixian: { han: "抗氧化力", pinyin: "kong55 iong24 fa55 lid5" },
+        meaning: "抗氧化力" },
+      { id: 28, group: "名詞", pos: "名詞",
+        hailu: { han: "終點", pinyin: "zhung53 diam24" },
+        sixian: { han: "終點", pinyin: "zung24 diam31" },
+        meaning: "終點" },
+      { id: 29, group: "動詞", pos: "動詞",
+        hailu: { han: "完成", pinyin: "van55 shin55" },
+        sixian: { han: "完成", pinyin: "van11 siin11" },
+        meaning: "完成" },
+      { id: 30, group: "動詞", pos: "動詞",
+        hailu: { han: "開始", pinyin: "koi53 shi24" },
+        sixian: { han: "開始", pinyin: "koi24 sii31" },
+        meaning: "開始" },
+      { id: 31, group: "名詞", pos: "名詞（器物）",
+        hailu: { han: "燒杯", pinyin: "shau53 bui53" },
+        sixian: { han: "燒杯", pinyin: "seu24 bi24" },
+        meaning: "燒杯" }
+      ]
+    },
+    /* ════════ 科學實驗語句練習（2 篇）════════ */
+    {
+      id: "read",
+      label: "科學實驗語句練習",
+      type: "reading",       // 逐句練習：每句一個音檔，另有「聆聽全文」；不做成詞彙卡，也不併入「所有詞彙」
+      groups: [],
+      words: [],
+      passages: [
+        { id: 1, title: "科學實驗語句練習1", lines: [
+          { id: 1, hailu: { han: "燒杯肚有高錳酸鉀", pinyin: "shau53 bui53 du24 rhiu53 go53 men24 son53 gab5" }, sixian: { han: "燒杯肚有高錳酸鉀", pinyin: "seu24 bi24 du31 iu24 go24 men31 son24 gab2" } },
+          { id: 2, hailu: { han: "這係鹼性、這係中性、這係酸性", pinyin: "lia24 he11 giam24 sin11、lia24 he11 zhung53 sin11、lia24 he11 son53 sin11" }, sixian: { han: "這係鹼性、這係中性、這係酸性", pinyin: "lia31 he55 giam31 xin55、lia31 he55 zung24 xin55、lia31 he55 son24 xin55" } },
+          { id: 3, hailu: { han: "接下來加入擂茶樣本", pinyin: "ziab5 ha53 loi55 ga53 ngib2 lui55 ca55 rhong33 bun24" }, sixian: { han: "接下來加入擂茶樣本", pinyin: "jiab2 ha24 loi11 ga24 ngib5 lui11 ca11 iong55 bun31" } },
+          { id: 4, hailu: { han: "觀察色水个變化", pinyin: "gon53 cad5 sed5 shui24 gai11 bien11 fa11" }, sixian: { han: "觀察色水个變化", pinyin: "gon24 cad2 sed2 sui31 ge55 bien55 fa55" } },
+          { id: 5, hailu: { han: "鹼性變做青色", pinyin: "giam24 sin11 bien11 zo11 ciang53 sed5" }, sixian: { han: "鹼性變做青色", pinyin: "giam31 xin55 bien55 zo55 qiang24 sed2" } },
+          { id: 6, hailu: { han: "中性變做豬肝色", pinyin: "zhung53 sin11 bien11 zo11 zhu53 gon53 sed5" }, sixian: { han: "中性變做豬肝色", pinyin: "zung24 xin55 bien55 zo55 zu24 gon24 sed2" } },
+          { id: 7, hailu: { han: "酸性變做無色", pinyin: "son53 sin11 bien11 zo11 mo55 sed5" }, sixian: { han: "酸性變做無色", pinyin: "son24 xin55 bien55 zo55 mo11 sed2" } },
+          { id: 8, hailu: { han: "承蒙大家", pinyin: "shin55 mung55 tai33 ga53" }, sixian: { han: "承蒙大家", pinyin: "siin11 mung11 tai55 ga24" } }
+        ] },
+        { id: 2, title: "科學實驗語句練習2", lines: [
+          { id: 1, hailu: { han: "滴定管，高錳酸鉀倒落去。", pinyin: "did5 tin33 gon24，go53 men24 son53 gab5 do24 log2 hi11" }, sixian: { han: "滴定管，高錳酸鉀倒落去。", pinyin: "did2 tin55 gon31，go24 men31 son24 gab2 do31 log5 hi55" } },
+          { id: 2, hailu: { han: "燒杯，擂茶樣本吸過來。", pinyin: "shau53 bui53，lui55 ca55 rhong33 bun24 kib2 go11 loi55" }, sixian: { han: "燒杯，擂茶樣本吸過來。", pinyin: "seu24 bi24，lui11 ca11 iong55 bun31 kib5 go55 loi11" } },
+          { id: 3, hailu: { han: "水倒落去、鹽酸倒落去。", pinyin: "shui24 do24 log2 hi11、rham55 son53 do24 log2 hi11" }, sixian: { han: "水倒落去、鹽酸倒落去。", pinyin: "sui31 do31 log5 hi55、iam11 son24 do31 log5 hi55" } },
+          { id: 4, hailu: { han: "開始分析：無色變茄色。", pinyin: "koi53 shi24 fun53 sid5：mo55 sed5 bien11 kio55 sed5" }, sixian: { han: "開始分析：無色變茄色。", pinyin: "koi24 sii31 fun24 xid2：mo11 sed2 bien55 kio11 sed2" } },
+          { id: 5, hailu: { han: "完成，滴定終點。", pinyin: "van55 shin55，did5 tin33 zhung53 diam24" }, sixian: { han: "完成，滴定終點。", pinyin: "van11 siin11，did2 tin55 zung24 diam31" } },
+          { id: 6, hailu: { han: "承蒙大家。", pinyin: "shin55 mung55 tai33 ga53" }, sixian: { han: "承蒙大家。", pinyin: "siin11 mung11 tai55 ga24" } }
+        ] }
       ]
     },
     /* ════════ 元素週期表（118 個元素）════════ */
