@@ -117,6 +117,8 @@
     sync('dialect', state.dialect);
     sync('tone', state.toneMode);
     sync('view', state.view);
+    // 詞彙卡：整張卡鎖在一個畫面的高度裡，下方的按鈕位置固定；內容太長時只在卡片中間那一塊捲動。
+    document.body.classList.toggle('card-lock', state.view === 'card');
     // 元素週期表：換成深色玻璃風格的底，並收起用不到的按鈕（檢視方式、華語揭曉、字級），免得按了沒有反應。
     const periodic = isPeriodic(topic()), reading = isReading(topic()), special = periodic || reading;
     document.body.classList.toggle('theme-tech', periodic);
@@ -167,6 +169,14 @@
     $('cardHan').textContent = entry ? entry.han : '（此腔調尚未建立資料）';
     const swatch = $('cardSwatch'), colorCount = swatchColors(word).length;
     swatch.innerHTML = swatchHTML(word, 'swatch'); swatch.hidden = !colorCount; swatch.classList.toggle('multi', colorCount > 1);
+    // 示意圖（例如結構式）：圖在 figures.js，直接以 SVG 畫在漢字旁，沒有底色。每次換到這張卡都會重播一次動畫。
+    const fig = (window.VOCAB_FIGURES || {})[word.figure], figBox = $('cardFigure');
+    // 只有換到另一個詞時才重畫（動畫從頭播一次）；同一張卡揭曉、切換腔調時不重播。
+    const figKey = fig ? `${word._uid}:${word.figure}` : '';
+    if (figBox.dataset.fig !== figKey) {
+      figBox.dataset.fig = figKey; figBox.hidden = !fig; figBox.innerHTML = fig ? fig.svg : '';
+      if (fig) figBox.querySelector('svg')?.setAttribute('aria-label', fig.label || '');
+    }
     $('cardPinyin').textContent = entry ? formatPinyin(entry.pinyin, state.dialect) : '';
     const alt = $('cardAlt');
     // 又音（同一個詞的另一個讀法）與又稱（另一個說法，例如漏斗又稱酒漏仔）都放在這一行

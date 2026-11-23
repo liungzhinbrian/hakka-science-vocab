@@ -16,6 +16,7 @@
    ─ 新增主題：在 topics 加一段 { id: "英文代號", label: "顯示名稱", groups: [], words: [ … ] }。
    ─ 「科學實驗語句練習」（type: "reading"）：passages 是各篇，lines 是各句；每句有 hailu／sixian 的漢字與調值拼音。
        音檔檔名是「篇-句」（例如 1-03），全文是「篇-full」，放在 assets/audio/read/〔腔調〕/。
+   ─ 詞彙可加 figure（示意圖的代號，圖本身在 figures.js），詞彙卡的漢字旁會出現這張圖，例如高錳酸鉀的結構式。
    ─ 詞彙可加 aka（又稱）：{ han, hailu, sixian }，卡片會多一行「又稱」；它的音檔用「編號-alt」。
    ─ 「元素週期表」是特別的主題（type: "periodic"）：以週期表呈現，不做成詞彙卡，也不併入「所有詞彙」。
        每個元素的欄位：id 原子序、sym 符號、en 英文名、cat 類別（對應 categories 的 id）、state 常溫常壓下的狀態、
@@ -30,7 +31,7 @@ window.VOCAB_DATA = {
   term: "115 學年度第一學期　客語結合十二年國教校訂課程",
   teachers: "授課教師：葉鈞喬老師、黃勤展老師",
   credit: "網頁編修／客華校訂／語音資料：曾櫳震老師",
-  version: "V2.3.0",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
+  version: "V2.3.1",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
   legend: [
     "客語漢字：優先使用教育部客語推薦用字表之漢字，若無則從俗暫用。",
     "客語拼音：以教育部辭典為主。資料以調值記錄，網站可切換顯示調值或調型符號。",
@@ -521,6 +522,7 @@ window.VOCAB_DATA = {
         hailu: { han: "高錳酸鉀", pinyin: "go53 men24 son53 gab5" },
         sixian: { han: "高錳酸鉀", pinyin: "go24 men31 son24 gab2" },
         meaning: "高錳酸鉀",
+        figure: "kmno4",
         note: "高錳酸鉀又稱過錳酸鉀，是一種無機化合物，化學式為KMnO₄，被廣泛用作強氧化劑。" },
       { id: 5, group: "名詞", pos: "名詞",
         hailu: { han: "樣本", pinyin: "rhong33 bun24" },
