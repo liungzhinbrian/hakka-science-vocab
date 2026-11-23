@@ -172,6 +172,7 @@
     // 示意圖（例如結構式）：圖在 figures.js，直接以 SVG 畫在漢字旁，沒有底色。每次換到這張卡都會重播一次動畫。
     const fig = (window.VOCAB_FIGURES || {})[word.figure], figBox = $('cardFigure');
     // 只有換到另一個詞時才重畫（動畫從頭播一次）；同一張卡揭曉、切換腔調時不重播。
+    figBox.closest('.word-area').classList.toggle('has-figure', Boolean(fig));   // 有圖時，左邊的文字讓出右側一欄
     const figKey = fig ? `${word._uid}:${word.figure}` : '';
     if (figBox.dataset.fig !== figKey) {
       figBox.dataset.fig = figKey; figBox.hidden = !fig; figBox.innerHTML = fig ? fig.svg : '';

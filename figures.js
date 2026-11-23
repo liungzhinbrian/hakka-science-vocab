@@ -7,18 +7,18 @@ window.VOCAB_FIGURES = {
      中間是錳，四周四個氧，其中一個氧帶負電，旁邊是鉀離子。整個式子以錳為中心慢慢轉動，符號保持正向。 */
   kmno4: {
     label: "高錳酸鉀的結構式：錳原子與四個氧原子以單鍵相連，旁邊是鉀離子",
-    svg: `<svg class="fig fig-kmno4" viewBox="-140 -140 280 280" role="img">
+    svg: `<svg class="fig fig-kmno4" viewBox="-158 -158 316 316" role="img">
     <g class="fig-spin">
-      <line class="fig-bond b1" x1="0" y1="-30" x2="0" y2="-58"/>
-      <line class="fig-bond b2" x1="33" y1="0" x2="58" y2="0"/>
-      <line class="fig-bond b3" x1="0" y1="30" x2="0" y2="58"/>
-      <line class="fig-bond b4" x1="-33" y1="0" x2="-58" y2="0"/>
-      <line class="fig-ionic" x1="-95" y1="0" x2="-103" y2="0"/>
-      <g transform="translate(0,-78)"><g class="fig-upright"><g class="fig-atom fig-o a1"><text>O</text></g></g></g>
-      <g transform="translate(78,0)"><g class="fig-upright"><g class="fig-atom fig-o a2"><text>O</text></g></g></g>
-      <g transform="translate(0,78)"><g class="fig-upright"><g class="fig-atom fig-o a3"><text>O</text></g></g></g>
-      <g transform="translate(-78,0)"><g class="fig-upright"><g class="fig-atom fig-o a4"><text>O</text><text class="fig-charge" x="17" y="-15">−</text></g></g></g>
-      <g transform="translate(-120,0)"><g class="fig-upright"><g class="fig-atom fig-k"><text>K</text><text class="fig-charge" x="15" y="-15">+</text></g></g></g>
+      <line class="fig-bond b1" x1="0" y1="-27" x2="0" y2="-62"/>
+      <line class="fig-bond b2" x1="40" y1="0" x2="62" y2="0"/>
+      <line class="fig-bond b3" x1="0" y1="27" x2="0" y2="62"/>
+      <line class="fig-bond b4" x1="-40" y1="0" x2="-62" y2="0"/>
+      <line class="fig-ionic" x1="-106" y1="0" x2="-113" y2="0"/>
+      <g transform="translate(0,-84)"><g class="fig-upright"><g class="fig-atom fig-o a1"><text>O</text></g></g></g>
+      <g transform="translate(84,0)"><g class="fig-upright"><g class="fig-atom fig-o a2"><text>O</text></g></g></g>
+      <g transform="translate(0,84)"><g class="fig-upright"><g class="fig-atom fig-o a3"><text>O</text></g></g></g>
+      <g transform="translate(-84,0)"><g class="fig-upright"><g class="fig-atom fig-o a4"><text>O</text><text class="fig-charge" x="22" y="-19">−</text></g></g></g>
+      <g transform="translate(-134,0)"><g class="fig-upright"><g class="fig-atom fig-k"><text>K</text><text class="fig-charge" x="19" y="-19">+</text></g></g></g>
       <g transform="translate(0,0)"><g class="fig-upright"><g class="fig-atom fig-mn"><text>Mn</text></g></g></g>
     </g>
 </svg>`

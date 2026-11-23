@@ -254,19 +254,23 @@ a{color:inherit}
 
 /* ══════════ 詞彙卡上的示意圖（figures.js）：透明底的 SVG；結構式比照課本，符號與鍵線都用白色、不上色 ══════════
    基本樣式就是「畫好之後」的樣子；動畫只負責從無到有，所以關掉動畫時會直接看到完成圖。 */
-.word-figure{flex:none;height:1.5em;display:flex;align-items:center;margin-left:.18em}
-/* 桌機與投影：圖放在卡片中間那一塊的右上角，不佔版面高度（漢字仍然置中）；手機則接在漢字後面 */
+/* 手機：圖放在漢字下方 */
+.word-figure{flex:0 0 100%;display:flex;justify-content:center;margin-top:6px}
+.word-figure .fig{width:min(66vw,250px);height:auto;aspect-ratio:1;overflow:visible}
+/* 桌機與投影：有圖的詞彙卡分成左右兩欄——左邊是漢字、拼音、釋義與備註（在左欄內置中），右邊是圖。
+   圖的邊長 --fig 跟著視窗大小走，整體和漢字那一塊差不多大。 */
 @media(min-width:701px){
-  .word-area{position:relative}
-  .word-figure{position:absolute;top:10px;right:18px;height:clamp(84px,46%,210px);margin:0}
+  .word-area{position:relative;--fig:clamp(170px,min(36vh,24vw),400px)}
+  .word-area.has-figure{padding-right:calc(var(--fig) + 40px)}
+  .word-figure{position:absolute;top:50%;right:22px;transform:translateY(-50%);height:min(var(--fig),calc(100% - 12px));aspect-ratio:1;margin:0;flex:none}
+  .word-figure .fig{width:100%;height:100%}
 }
-.word-figure .fig{height:100%;width:auto;overflow:visible}
-.fig-bond{stroke:#fff;stroke-width:5.5;stroke-linecap:round;stroke-dasharray:40;stroke-dashoffset:0;animation:fig-draw .5s ease-out both}
+.fig-bond{stroke:#fff;stroke-width:6.5;stroke-linecap:round;stroke-dasharray:40;stroke-dashoffset:0;animation:fig-draw .5s ease-out both}
 .fig-bond.b1{animation-delay:.25s}.fig-bond.b2{animation-delay:.4s}.fig-bond.b3{animation-delay:.55s}.fig-bond.b4{animation-delay:.7s}
 .fig-ionic{stroke:rgba(255,255,255,.85);stroke-width:4;stroke-linecap:round;stroke-dasharray:.1 8;animation:fig-fade .5s ease-out 1.8s both}
-.fig-atom text{font:800 35px/1 Arial,"Noto Sans",sans-serif;text-anchor:middle;dominant-baseline:central;fill:#fff}
-.fig-atom.fig-mn text{font-size:37px}
-.fig-atom .fig-charge{font-size:25px}
+.fig-atom text{font:800 46px/1 Arial,"Noto Sans",sans-serif;text-anchor:middle;dominant-baseline:central;fill:#fff}
+.fig-atom.fig-mn text{font-size:48px}
+.fig-atom .fig-charge{font-size:31px}
 .fig-atom{animation:fig-pop .45s cubic-bezier(.3,1.5,.5,1) both}
 .fig-mn{animation-delay:0s}.fig-o.a1{animation-delay:.6s}.fig-o.a2{animation-delay:.75s}.fig-o.a3{animation-delay:.9s}.fig-o.a4{animation-delay:1.05s}.fig-k{animation-delay:1.4s}
 /* 轉動：整個式子繞著錳轉（26 秒一圈），每個符號同時反方向轉，所以字一直是正的 */
@@ -286,8 +290,9 @@ a{color:inherit}
   body.card-lock .main,body.card-lock .card-layout,body.card-lock .card-main{min-height:0}
   body.card-lock .word-area{min-height:0;overflow-y:auto;justify-content:safe center;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.4) transparent}
   body.card-lock .answer{width:min(920px,96%)}
+  body.card-lock .word-area.has-figure{padding-right:calc(var(--fig) + 40px)}
 }
-@media(min-width:701px) and (max-width:1100px){ .word-figure{height:clamp(70px,34%,150px)} }
+
 
 /* 中等高度（701–880 像素，例如 1366×768 全螢幕、1280×720、1536×864）：只收緊備註與間距，漢字大小幾乎不變 */
 @media(max-height:880px) and (min-height:701px) and (min-width:701px){
