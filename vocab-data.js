@@ -31,14 +31,14 @@ window.VOCAB_DATA = {
   term: "115 學年度第一學期　客語結合十二年國教校訂課程",
   teachers: "授課教師：葉鈞喬老師、黃勤展老師",
   credit: "網頁編修／客華校訂／語音資料：曾櫳震老師",
-  version: "V2.3.2",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
+  version: "V2.3.3",   // 每次改版請更新，並在 CHANGELOG.md 與 versions.html 各加一筆
   legend: [
     "客語漢字：優先使用教育部客語推薦用字表之漢字，若無則從俗暫用。",
     "客語拼音：以教育部辭典為主。資料以調值記錄，網站可切換顯示調值或調型符號。",
     "華語釋義：必要時加註說明。"
   ],
   topics: [
-    /* ════════ 主題一：擂茶（60 詞）════════ */
+    /* ════════ 主題一：擂茶（65 詞）════════ */
     {
       id: "leicha",
       label: "擂茶",
@@ -294,10 +294,30 @@ window.VOCAB_DATA = {
       { id: 60, group: "adj", pos: "形容詞",
         hailu: { han: "鮮鮮", pinyin: "sien53 sien53" },
         sixian: { han: "鮮鮮", pinyin: "xien24 xien24" },
-        meaning: "物品較稀的狀態" }
+        meaning: "物品較稀的狀態" },
+      { id: 61, group: "verb", pos: "動詞",
+        hailu: { han: "打爽", pinyin: "da24 song24" },
+        sixian: { han: "打爽", pinyin: "da31 song31" },
+        meaning: "浪費" },
+      { id: 62, group: "adj", pos: "形容詞",
+        hailu: { han: "好食", pinyin: "ho24 shid2" },
+        sixian: { han: "好食", pinyin: "ho31 siid5" },
+        meaning: "好吃、好喝" },
+      { id: 63, group: "noun", pos: "名詞",
+        hailu: { han: "牙齒", pinyin: "nga55 chi24" },
+        sixian: { han: "牙齒", pinyin: "nga11 cii31" },
+        meaning: "牙齒" },
+      { id: 64, group: "adj", pos: "形容詞",
+        hailu: { han: "軟", pinyin: "ngion53" },
+        sixian: { han: "軟", pinyin: "ngion24" },
+        meaning: "軟" },
+      { id: 65, group: "adj", pos: "形容詞",
+        hailu: { han: "硬", pinyin: "ngang33" },
+        sixian: { han: "硬", pinyin: "ngang55" },
+        meaning: "硬" }
       ]
     },
-    /* ════════ 主題二：傳統醫學與養生（40 詞）════════ */
+    /* ════════ 主題二：傳統醫學與養生（48 詞）════════ */
     {
       id: "tcm",
       label: "傳統醫學與養生",
@@ -352,7 +372,7 @@ window.VOCAB_DATA = {
       { id: 5, group: "名詞", pos: "名詞",
         hailu: { han: "艾仔", pinyin: "ngie11 er55" },
         sixian: { han: "艾仔", pinyin: "ngie55 e31" },
-        meaning: "艾草" },
+        meaning: "茼蒿" },
       { id: 6, group: "名詞", pos: "名詞",
         hailu: { han: "七層塔", pinyin: "cid5 cen55 tab5", alt: "cid5 sien55 cab5" },
         sixian: { han: "七層塔", pinyin: "qid2 cen11 tab2", alt: "qid2 xien11 cab2" },
@@ -492,10 +512,42 @@ window.VOCAB_DATA = {
       { id: 40, group: "動詞", pos: "動詞",
         hailu: { han: "冷著", pinyin: "lang53 do24" },
         sixian: { han: "寒著", pinyin: "hon11 do31" },
-        meaning: "著涼、感冒" }
+        meaning: "著涼、感冒" },
+      { id: 41, group: "動詞", pos: "動詞",
+        hailu: { han: "調養", pinyin: "tiau55 rhong53" },
+        sixian: { han: "調養", pinyin: "tiau11 iong24" },
+        meaning: "調養" },
+      { id: 42, group: "名詞", pos: "名詞",
+        hailu: { han: "身體", pinyin: "shin53 ti24" },
+        sixian: { han: "身體", pinyin: "siin24 ti31" },
+        meaning: "身體" },
+      { id: 43, group: "動詞", pos: "動詞",
+        hailu: { han: "醫病", pinyin: "rhi53 piang33" },
+        sixian: { han: "醫病", pinyin: "i24 piang55" },
+        meaning: "治病" },
+      { id: 44, group: "形容詞", pos: "形容詞",
+        hailu: { han: "傷重", pinyin: "shong53 dong11" },
+        sixian: { han: "傷重", pinyin: "song24 dong55" },
+        meaning: "嚴重" },
+      { id: 45, group: "名詞", pos: "名詞",
+        hailu: { han: "穀米", pinyin: "gug5 mi24" },
+        sixian: { han: "穀米", pinyin: "gug2 mi31" },
+        meaning: "穀米" },
+      { id: 46, group: "名詞", pos: "名詞",
+        hailu: { han: "黃豆", pinyin: "vong55 teu33" },
+        sixian: { han: "黃豆", pinyin: "vong11 teu55" },
+        meaning: "黃豆" },
+      { id: 47, group: "名詞", pos: "名詞",
+        hailu: { han: "藥單仔", pinyin: "rhog2 dan53 er55" },
+        sixian: { han: "藥單仔", pinyin: "iog5 dan24 e31" },
+        meaning: "處方箋" },
+      { id: 48, group: "名詞", pos: "名詞",
+        hailu: { han: "大艾", pinyin: "tai33 ngie11" },
+        sixian: { han: "大艾", pinyin: "tai55 ngie55" },
+        meaning: "艾草" }
       ]
     },
-    /* ════════ 主題三：化學實驗（31 詞）════════ */
+    /* ════════ 主題三：化學實驗（35 詞）════════ */
     {
       id: "chem",
       label: "化學實驗",
@@ -646,7 +698,23 @@ window.VOCAB_DATA = {
       { id: 31, group: "名詞", pos: "名詞（器物）",
         hailu: { han: "燒杯", pinyin: "shau53 bui53" },
         sixian: { han: "燒杯", pinyin: "seu24 bi24" },
-        meaning: "燒杯" }
+        meaning: "燒杯" },
+      { id: 32, group: "名詞", pos: "名詞",
+        hailu: { han: "鹽酸", pinyin: "rham55 son53" },
+        sixian: { han: "鹽酸", pinyin: "iam11 son24" },
+        meaning: "鹽酸" },
+      { id: 33, group: "名詞", pos: "名詞",
+        hailu: { han: "刻度", pinyin: "kad5 tu33" },
+        sixian: { han: "刻度", pinyin: "kad2 tu55" },
+        meaning: "刻度" },
+      { id: 34, group: "名詞", pos: "量詞",
+        hailu: { han: "毫升", pinyin: "ho55 shin53" },
+        sixian: { han: "毫升", pinyin: "ho11 siin24" },
+        meaning: "毫升" },
+      { id: 35, group: "名詞", pos: "名詞",
+        hailu: { han: "數據", pinyin: "su11 gi24" },
+        sixian: { han: "數據", pinyin: "su55 gi31" },
+        meaning: "數據" }
       ]
     },
     /* ════════ 科學實驗語句練習（2 篇）════════ */
